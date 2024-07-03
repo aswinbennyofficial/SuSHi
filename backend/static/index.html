@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuSHI v0</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
+    <style>
+        #terminal-container {
+            width: 100%;
+            height: 100vh;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script>
+        const term = new Terminal();
+        term.open(document.getElementById('terminal-container'));
+
+        const wsURL = `ws://${window.location.host}/ssh`;
+        const ws = new WebSocket(wsURL);
+
+        ws.onopen = () => {
+            term.write('Connected to SuSHI v0...\r\n\r\n');
+            term.prompt = '> ';
+            term.onData(data => {
+                ws.send(data);
+            });
+        };
+
+        ws.onmessage = event => {
+            term.write(event.data);
+        };
+
+        ws.onerror = event => {
+            term.write(`WebSocket error: ${event}\r\n`);
+        };
+
+        ws.onclose = () => {
+            term.write('Connection closed.\r\n');
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+
+# Do `go build -o app .` first 
+
+# Production stage
+FROM debian
+
+RUN apt update && apt install -y ca-certificates
+
+# Create a directory for the application
+RUN mkdir /sushi-backend
+
+# Create a directory for the log file
+RUN mkdir /sushi-backend/logs
+
+# Copy the built binary from the build stage
+COPY ./app /sushi-backend/app
+
+COPY ./static /sushi-backend/static
+
+
+
+
+# Set the working directory
+WORKDIR /sushi-backend
+
+# Expose port
+EXPOSE 8080
+
+# Run the Golang application
+CMD ["./app"]
