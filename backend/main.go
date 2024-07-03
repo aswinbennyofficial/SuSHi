@@ -38,6 +38,17 @@ func init(){
 
 	// Show config log
 	showConfigLog()
+
+	// Connect to the database
+	err = ConnectDB()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to connect to the database")
+		return
+	}
+	
+
+
+	
 }
 
 var upgrader = websocket.Upgrader{
