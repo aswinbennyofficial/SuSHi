@@ -9,14 +9,15 @@ import (
     // "github.com/rs/zerolog/log"
 )
 
-// config is the package-level variable which is used to store the configuration
-var config Config
+
+
 
 /*
 LoadConfig() is used to load the configuration from the environment variables . It initializes the package-level variable config  with the configuration values. It returns the error as output.
 */
-func LoadConfig() error {
-    
+func LoadConfig() (Config, error) {
+    var config Config
+
     config.ServerPort = os.Getenv("SERVER_PORT")
     config.JWTSecret = os.Getenv("JWT_SECRET")
 	config.LogLevel = os.Getenv("LOG_LEVEL")
@@ -47,5 +48,5 @@ func LoadConfig() error {
     }
 
 
-    return nil
+    return config,nil
 }

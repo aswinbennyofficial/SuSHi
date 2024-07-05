@@ -1,6 +1,8 @@
 package main
 
-
+import(
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 
 // Config struct
@@ -12,6 +14,7 @@ type Config struct {
 	LogPath            string
 	SSHConfig          SSHConfig
 	DatabaseConfig     DatabaseConfig
+	DB                 *pgxpool.Pool
 
 }
 

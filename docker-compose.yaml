@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres
+    image: bitnami/postgresql
     container_name: postgres
     ports:
       - "5432:5432"
@@ -10,9 +10,12 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: sushi
-    volumes:
-      - ./data:/var/lib/postgresql/data
+    # volumes:
+    #   - ./data:/var/lib/postgresql/data
     restart: always
+   
+
+    
 
   sushi-backend:
     image: breeze5690/sushi-backend:v1
@@ -29,11 +32,11 @@ services:
       - DB_NAME=sushi
       - SSH_HOST=
       - SSH_PORT=22
-      - SSH_USER=ec2-user
+      - SSH_USER=
       - |
         SSH_PRIVATE_KEY=
-    volumes:
-      - ./static:/app/static
+    # volumes:
+    #   - ./static:/app/static
     depends_on:
       - postgres
     restart: always

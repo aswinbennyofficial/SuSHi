@@ -15,36 +15,7 @@ import (
 
 
 func init(){
-	//  Load configuration
-    err := LoadConfig()
-    if err != nil {
-        log.Panic().Err(err).Msg("Error in LoadConfig()")
-        return
-    }
-
-    log.Info().Msg("Configuration loaded successfully")
-
-    // Set log level
-    if config.LogLevel == "Debug" {
-        zerolog.SetGlobalLevel(zerolog.DebugLevel)
-    } else {
-        zerolog.SetGlobalLevel(zerolog.InfoLevel)
-    }
-
-    // Load logger
-    LoadLogger()
-
-
-
-	// Show config log
-	showConfigLog()
-
-	// Connect to the database
-	err = ConnectDB()
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to connect to the database")
-		return
-	}
+	
 	
 
 
@@ -60,6 +31,43 @@ var upgrader = websocket.Upgrader{
 
 
 func main() {
+	var config Config
+
+	//  Load configuration
+    config,err := LoadConfig()
+    if err != nil {
+        log.Panic().Err(err).Msg("Error in LoadConfig()")
+        return
+    }
+
+    log.Info().Msg("Configuration loaded successfully")
+
+    // Set log level
+    if config.LogLevel == "Debug" {
+        zerolog.SetGlobalLevel(zerolog.DebugLevel)
+    } else {
+        zerolog.SetGlobalLevel(zerolog.InfoLevel)
+    }
+
+    // Load logger
+    config.LoadLogger()
+
+
+
+	// Show config log
+	config.showConfigLog()
+
+	// Connect to the database
+	err = config.ConnectDB()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to connect to the database")
+		return
+	}
+
+	
+	
+	
+
 	r := chi.NewRouter()
 
 	// Serve static files (e.g., xterm.js frontend)
@@ -70,18 +78,18 @@ func main() {
 	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
 	// WebSocket handler
-	r.Get("/ssh", handleSSHConnection)
+	r.Get("/ssh", config.handleSSHConnection)
 
 	// Start HTTP server
 	log.Info().Msgf("Starting server on port %s", config.ServerPort)
-	err := http.ListenAndServe(":8080", r)
+	err = http.ListenAndServe(":8080", r)
 	if err != nil {
 		log.Fatal().Msgf("Failed to start server: %v", err)
 	}
 }
 
 
-func showConfigLog(){
+func (config *Config)showConfigLog(){
 	log.Debug().Msgf("ServerPort: %s", config.ServerPort)
 	log.Debug().Msgf("JWTSecret: %s", config.JWTSecret)
 	log.Debug().Msgf("LogLevel: %s", config.LogLevel)

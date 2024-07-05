@@ -14,7 +14,7 @@ var (
 )
 
 // LoadLogger is a function that loads the logger
-func LoadLogger() {
+func (config *Config)LoadLogger() {
     // Open log file for writing
     var err error
     AppLogFile, err = os.OpenFile(config.LogPath+"/activity-metrics-backend.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)

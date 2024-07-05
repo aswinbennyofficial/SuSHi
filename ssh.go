@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func handleSSHConnection(w http.ResponseWriter, r *http.Request) {
+func (config *Config)handleSSHConnection(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Error upgrading to WebSocket: %v", err)
@@ -28,7 +28,7 @@ func handleSSHConnection(w http.ResponseWriter, r *http.Request) {
 		log.Fatal().Msgf("Failed to parse private key: %v", err)
 	}
 
-	config := &ssh.ClientConfig{
+	sshconfig := &ssh.ClientConfig{
 		User: sshUser,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(signer),
@@ -37,7 +37,7 @@ func handleSSHConnection(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Connect to SSH server
-	client, err := ssh.Dial("tcp", sshHost+":"+sshPort, config)
+	client, err := ssh.Dial("tcp", sshHost+":"+sshPort, sshconfig)
 	if err != nil {
 		log.Fatal().Msgf("Failed to dial SSH server: %v", err)
 	}

@@ -4,15 +4,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 )
 
-// DB is the package-level variable which is used to store the database connection pool
-var DB *pgx.Conn
+
 
 // ConnectDB() is used to connect to the database using the configuration values. It initializes the package-level variable DB with the database connection pool. It returns the error as output.
-func ConnectDB() error {
+func (config *Config)ConnectDB() error {
 	connectionString := "host=" + config.DatabaseConfig.Host + 
 		" port=" + config.DatabaseConfig.Port + 
 		" user=" + config.DatabaseConfig.User + 
@@ -21,11 +20,11 @@ func ConnectDB() error {
 		" sslmode=disable"
 
 	ctx := context.Background()
-	var conn *pgx.Conn
+	var conn *pgxpool.Pool
 	var err error
 
-	for i := 0; i < 3; i++ {
-		conn, err = pgx.Connect(ctx, connectionString)
+	for i := 0; i < 5; i++ {
+		conn, err = pgxpool.New(ctx, connectionString)
 		if err == nil {
 			break
 		}
@@ -38,15 +37,20 @@ func ConnectDB() error {
 		return err
 	}
 
-	log.Info().Msg("Connected to the database")
+	
 
 	// ping the database
-	err = conn.Ping(ctx)
-	if err != nil {
-		log.Fatal().Msgf("Failed to ping the database: %v", err)
-		return err
+	for i := 0; i < 5; i++ {
+		err = conn.Ping(ctx)
+		if err == nil {
+			break
+		}
+		log.Error().Msgf("Attempt %d: Failed to ping the database: %v", i+1, err)
+		time.Sleep(5 * time.Second)
 	}
 
-	DB = conn
+	log.Info().Msg("Connected to the database")
+
+	config.DB = conn
 	return nil
 }
