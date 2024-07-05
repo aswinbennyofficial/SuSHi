@@ -10,6 +10,13 @@ import (
 )
 
 func MigrateDB(config models.Config) error{
+	log.Debug().Msgf("DoMigrations : %v",config.DoMigrations)
+
+	if !config.DoMigrations {
+		log.Debug().Msg("Skipping database migration")
+		return nil
+	}
+
 	log.Debug().Msg("Migrating the database")
 	log.Debug().Msg("Connection string : "+ config.DatabaseConfig.String)
 	db,error:=sql.Open("postgres", config.DatabaseConfig.String)

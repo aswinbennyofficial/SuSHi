@@ -1,20 +1,4 @@
 -- +goose Up
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE organizations (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
 CREATE TABLE machines (
     id SERIAL PRIMARY KEY,
@@ -35,5 +19,4 @@ CREATE TABLE machines (
 
 -- +goose Down
 DROP TABLE IF EXISTS machines;
-DROP TABLE IF EXISTS organizations;
-DROP TABLE IF EXISTS users;
+

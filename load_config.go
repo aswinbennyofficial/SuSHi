@@ -33,6 +33,9 @@ func LoadConfig() (models.Config, error) {
     config.DatabaseConfig.Password = os.Getenv("DB_PASSWORD")
     config.DatabaseConfig.Database = os.Getenv("DB_NAME")
 
+    config.DoMigrations = (os.Getenv("MIGRATE_DB") == "true")
+
+
 
    
 

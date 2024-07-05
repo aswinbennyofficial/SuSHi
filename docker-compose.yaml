@@ -35,8 +35,7 @@ services:
       - SSH_USER=
       - |
         SSH_PRIVATE_KEY=
-    # volumes:
-    #   - ./static:/app/static
+      - MIGRATE_DB=false 
     depends_on:
       - postgres
     restart: always

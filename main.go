@@ -100,6 +100,7 @@ func showConfigLog(config models.Config){
 	log.Debug().Msgf("Password: %s", config.DatabaseConfig.Password)
 	log.Debug().Msgf("Database: %s", config.DatabaseConfig.Database)
 
+
 }
 
 func LoadWebRoutes(config models.Config) {

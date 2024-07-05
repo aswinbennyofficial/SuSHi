@@ -17,6 +17,7 @@ type Config struct {
 	DatabaseConfig     DatabaseConfig
 	DB                 *pgxpool.Pool
 	Router			   *chi.Mux
+	DoMigrations	   bool
 
 }
 
