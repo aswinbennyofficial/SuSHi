@@ -14,6 +14,7 @@ RUN mkdir /sushi-backend/logs
 
 # Create a directory for the database
 RUN mkdir /sushi-backend/db
+COPY ./db /sushi-backend/db
 
 # Copy the built binary from the build stage
 COPY ./app /sushi-backend/app

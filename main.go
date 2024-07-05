@@ -57,10 +57,20 @@ func main() {
 	// Show config log
 	config.showConfigLog()
 
+	
+
 	// Connect to the database
 	err = config.ConnectDB()
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to connect to the database")
+		return
+	}
+
+
+	// Do migration
+	err = config.migrateDB()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to migrate the database")
 		return
 	}
 

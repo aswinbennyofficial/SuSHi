@@ -4,11 +4,17 @@ import (
 	"context"
 	"time"
 
+
 	"github.com/jackc/pgx/v5/pgxpool"
+	
+	"github.com/pressly/goose/v3"
+	"database/sql"
+	_ "github.com/lib/pq"
+	
 	"github.com/rs/zerolog/log"
+
+	
 )
-
-
 
 // ConnectDB() is used to connect to the database using the configuration values. It initializes the package-level variable DB with the database connection pool. It returns the error as output.
 func (config *Config)ConnectDB() error {
@@ -18,6 +24,8 @@ func (config *Config)ConnectDB() error {
 		" password=" + config.DatabaseConfig.Password + 
 		" dbname=" + config.DatabaseConfig.Database + 
 		" sslmode=disable"
+
+	config.DatabaseConfig.String = connectionString
 
 	ctx := context.Background()
 	var conn *pgxpool.Pool
@@ -52,5 +60,28 @@ func (config *Config)ConnectDB() error {
 	log.Info().Msg("Connected to the database")
 
 	config.DB = conn
+	return nil
+}
+
+
+func (config *Config)migrateDB() error{
+	
+	db,error:=sql.Open("postgres", config.DatabaseConfig.String)
+	if error != nil {
+		return error
+	}
+	defer db.Close()
+
+	goose.SetDialect("postgres")
+
+	err:=goose.Up(db, "db/migrations")
+	if err != nil {
+		return err
+	}
+
+
+
+
+	
 	return nil
 }

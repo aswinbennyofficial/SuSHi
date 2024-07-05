@@ -31,5 +31,6 @@ type DatabaseConfig struct {
 	User string
 	Password string
 	Database string
+	String 	string
 }
 
