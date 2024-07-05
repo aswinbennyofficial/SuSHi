@@ -1,7 +1,8 @@
-package main
+package models
 
 import(
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/go-chi/chi/v5"
 )
 
 
@@ -15,6 +16,7 @@ type Config struct {
 	SSHConfig          SSHConfig
 	DatabaseConfig     DatabaseConfig
 	DB                 *pgxpool.Pool
+	Router			   *chi.Mux
 
 }
 

@@ -1,14 +1,23 @@
-package main
+package ssh
 
 import (
 	"net/http"
 	"sync"
+
+	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/gorilla/websocket"
-	"golang.org/x/crypto/ssh"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/crypto/ssh"
 )
 
-func (config *Config)handleSSHConnection(w http.ResponseWriter, r *http.Request) {
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+
+func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("Error upgrading to WebSocket: %v", err)

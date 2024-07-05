@@ -1,23 +1,19 @@
-package main
+package database
 
 import (
 	"context"
 	"time"
 
-
+	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/jackc/pgx/v5/pgxpool"
-	
-	"github.com/pressly/goose/v3"
-	"database/sql"
-	_ "github.com/lib/pq"
-	
-	"github.com/rs/zerolog/log"
 
-	
+
+	"github.com/rs/zerolog/log"
 )
 
+
 // ConnectDB() is used to connect to the database using the configuration values. It initializes the package-level variable DB with the database connection pool. It returns the error as output.
-func (config *Config)ConnectDB() error {
+func ConnectDB(config models.Config) (*pgxpool.Pool,string,error) {
 	connectionString := "host=" + config.DatabaseConfig.Host + 
 		" port=" + config.DatabaseConfig.Port + 
 		" user=" + config.DatabaseConfig.User + 
@@ -25,7 +21,7 @@ func (config *Config)ConnectDB() error {
 		" dbname=" + config.DatabaseConfig.Database + 
 		" sslmode=disable"
 
-	config.DatabaseConfig.String = connectionString
+	
 
 	ctx := context.Background()
 	var conn *pgxpool.Pool
@@ -42,7 +38,7 @@ func (config *Config)ConnectDB() error {
 
 	if err != nil {
 		log.Fatal().Msgf("Failed to connect to the database after 3 attempts: %v", err)
-		return err
+		return nil,"",err
 	}
 
 	
@@ -59,29 +55,8 @@ func (config *Config)ConnectDB() error {
 
 	log.Info().Msg("Connected to the database")
 
-	config.DB = conn
-	return nil
+	
+	return conn,connectionString,nil
 }
 
 
-func (config *Config)migrateDB() error{
-	
-	db,error:=sql.Open("postgres", config.DatabaseConfig.String)
-	if error != nil {
-		return error
-	}
-	defer db.Close()
-
-	goose.SetDialect("postgres")
-
-	err:=goose.Up(db, "db/migrations")
-	if err != nil {
-		return err
-	}
-
-
-
-
-	
-	return nil
-}

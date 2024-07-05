@@ -1,37 +1,28 @@
 package main
 
 import (
-	
 	"net/http"
 	"os"
-	
 
 	"github.com/go-chi/chi/v5"
-	"github.com/gorilla/websocket"
-	
-	"github.com/rs/zerolog/log"
+
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
+	database "github.com/aswinbennyofficial/SuSHi/db"
+	"github.com/aswinbennyofficial/SuSHi/models"
+	"github.com/aswinbennyofficial/SuSHi/ssh"
+	"github.com/aswinbennyofficial/SuSHi/utils"
 )
 
 
-func init(){
-	
-	
 
 
-	
-}
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
 
 
 
 func main() {
-	var config Config
+	var config models.Config
 
 	//  Load configuration
     config,err := LoadConfig()
@@ -49,18 +40,21 @@ func main() {
         zerolog.SetGlobalLevel(zerolog.InfoLevel)
     }
 
+	
+
+	
     // Load logger
-    config.LoadLogger()
+    utils.LoadLogger(config)
 
 
 
 	// Show config log
-	config.showConfigLog()
+	showConfigLog(config)
 
 	
 
 	// Connect to the database
-	err = config.ConnectDB()
+	config.DB,config.DatabaseConfig.String,err = database.ConnectDB(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to connect to the database")
 		return
@@ -68,7 +62,7 @@ func main() {
 
 
 	// Do migration
-	err = config.migrateDB()
+	err = database.MigrateDB(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to migrate the database")
 		return
@@ -78,28 +72,20 @@ func main() {
 	
 	
 
-	r := chi.NewRouter()
+	config.Router = chi.NewRouter()
 
-	// Serve static files (e.g., xterm.js frontend)
-	workDir, _ := os.Getwd()
-	filesDir := http.Dir(workDir + "/static")
-    log.Print(workDir+"/static")
-	fileServer := http.FileServer(filesDir)
-	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
-
-	// WebSocket handler
-	r.Get("/ssh", config.handleSSHConnection)
+	LoadWebRoutes(config)
 
 	// Start HTTP server
 	log.Info().Msgf("Starting server on port %s", config.ServerPort)
-	err = http.ListenAndServe(":8080", r)
+	err = http.ListenAndServe(":8080", config.Router)
 	if err != nil {
 		log.Fatal().Msgf("Failed to start server: %v", err)
 	}
 }
 
 
-func (config *Config)showConfigLog(){
+func showConfigLog(config models.Config){
 	log.Debug().Msgf("ServerPort: %s", config.ServerPort)
 	log.Debug().Msgf("JWTSecret: %s", config.JWTSecret)
 	log.Debug().Msgf("LogLevel: %s", config.LogLevel)
@@ -114,4 +100,20 @@ func (config *Config)showConfigLog(){
 	log.Debug().Msgf("Password: %s", config.DatabaseConfig.Password)
 	log.Debug().Msgf("Database: %s", config.DatabaseConfig.Database)
 
+}
+
+func LoadWebRoutes(config models.Config) {
+	r:=config.Router
+	// Serve static files (e.g., xterm.js frontend)
+	workDir, _ := os.Getwd()
+	filesDir := http.Dir(workDir + "/static")
+    log.Print(workDir+"/static")
+	fileServer := http.FileServer(filesDir)
+	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
+
+	
+	// WebSocket handler
+    r.Get("/ssh", func(w http.ResponseWriter, r *http.Request) {
+        ssh.HandleSSHConnection(config, w, r)
+    })
 }

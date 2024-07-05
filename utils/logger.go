@@ -1,11 +1,11 @@
-package main
+package utils
 
 import (
+	"os"
 
-    "os"
-
-    "github.com/rs/zerolog"
-    "github.com/rs/zerolog/log"
+	"github.com/aswinbennyofficial/SuSHi/models"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -13,8 +13,12 @@ var (
     AppLogger  zerolog.Logger
 )
 
+type Config models.Config
+
+
+
 // LoadLogger is a function that loads the logger
-func (config *Config)LoadLogger() {
+func LoadLogger(config models.Config) {
     // Open log file for writing
     var err error
     AppLogFile, err = os.OpenFile(config.LogPath+"/activity-metrics-backend.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)

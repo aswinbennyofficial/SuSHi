@@ -5,18 +5,15 @@ import (
 	// "strconv"
 	"strings"
 
-
-    // "github.com/rs/zerolog/log"
+	"github.com/aswinbennyofficial/SuSHi/models"
+	// "github.com/rs/zerolog/log"
 )
-
-
-
 
 /*
 LoadConfig() is used to load the configuration from the environment variables . It initializes the package-level variable config  with the configuration values. It returns the error as output.
 */
-func LoadConfig() (Config, error) {
-    var config Config
+func LoadConfig() (models.Config, error) {
+    var config models.Config
 
     config.ServerPort = os.Getenv("SERVER_PORT")
     config.JWTSecret = os.Getenv("JWT_SECRET")
