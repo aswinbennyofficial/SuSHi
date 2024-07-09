@@ -9,7 +9,7 @@ dev:
 
 prod:
 	@echo "Building production Docker image..."
-	 go build -o app . && docker build -t breeze5690/sushi-backend:v1 && podman-compose up
+	docker build -t breeze5690/sushi-backend:v1 && podman-compose up
 
 kill:
 	podman-compose -f ./docker-compose-dev.yaml  down

@@ -24,7 +24,7 @@ func main() {
 	var config models.Config
 
 	//  Load configuration
-    config,err := LoadConfig()
+    config,err := utils.LoadConfig()
     if err != nil {
         log.Panic().Err(err).Msg("Error in LoadConfig()")
         return
