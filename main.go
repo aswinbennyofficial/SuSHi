@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
 
@@ -11,7 +10,7 @@ import (
 
 	database "github.com/aswinbennyofficial/SuSHi/db"
 	"github.com/aswinbennyofficial/SuSHi/models"
-	"github.com/aswinbennyofficial/SuSHi/ssh"
+	"github.com/aswinbennyofficial/SuSHi/routes"
 	"github.com/aswinbennyofficial/SuSHi/utils"
 )
 
@@ -54,7 +53,7 @@ func main() {
 	
 
 	// Connect to the database
-	config.DB,config.DatabaseConfig.String,err = database.ConnectDB(config)
+	config.DB,config.DatabaseConfig.String,err = database.Connect(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to connect to the database")
 		return
@@ -62,7 +61,7 @@ func main() {
 
 
 	// Do migration
-	err = database.MigrateDB(config)
+	err = database.Migrate(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to migrate the database")
 		return
@@ -74,7 +73,8 @@ func main() {
 
 	config.Router = chi.NewRouter()
 
-	LoadWebRoutes(config)
+	
+	routes.Load(config)
 
 	// Start HTTP server
 	log.Info().Msgf("Starting server on port %s", config.ServerPort)
@@ -103,18 +103,3 @@ func showConfigLog(config models.Config){
 
 }
 
-func LoadWebRoutes(config models.Config) {
-	r:=config.Router
-	// Serve static files (e.g., xterm.js frontend)
-	workDir, _ := os.Getwd()
-	filesDir := http.Dir(workDir + "/static")
-    log.Print(workDir+"/static")
-	fileServer := http.FileServer(filesDir)
-	r.Handle("/static/*", http.StripPrefix("/static/", fileServer))
-
-	
-	// WebSocket handler
-    r.Get("/ssh", func(w http.ResponseWriter, r *http.Request) {
-        ssh.HandleSSHConnection(config, w, r)
-    })
-}

@@ -13,7 +13,7 @@ import (
 
 
 // ConnectDB() is used to connect to the database using the configuration values. It initializes the package-level variable DB with the database connection pool. It returns the error as output.
-func ConnectDB(config models.Config) (*pgxpool.Pool,string,error) {
+func Connect(config models.Config) (*pgxpool.Pool,string,error) {
 	connectionString := "host=" + config.DatabaseConfig.Host + 
 		" port=" + config.DatabaseConfig.Port + 
 		" user=" + config.DatabaseConfig.User + 

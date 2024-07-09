@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func MigrateDB(config models.Config) error{
+func Migrate(config models.Config) error{
 	log.Debug().Msgf("DoMigrations : %v",config.DoMigrations)
 
 	if !config.DoMigrations {
