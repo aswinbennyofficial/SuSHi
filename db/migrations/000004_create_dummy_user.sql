@@ -1,7 +1,7 @@
 -- +goose Up
 INSERT INTO users (username, name, email, salt)
 VALUES (
-    'dummy_user123',
+    '123456',
     'Dummy User',
     'dummy@example.com',
     'randomsalt123456789'
@@ -9,4 +9,4 @@ VALUES (
 
 
 -- +goose Down
-DELETE FROM users WHERE username = 'dummy_user123';
+DELETE FROM users WHERE username = '123456';
