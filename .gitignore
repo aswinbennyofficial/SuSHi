@@ -1,3 +1,3 @@
 app
-docker-compose-dev.yml
+docker-compose-dev.yaml
 postgres-data
