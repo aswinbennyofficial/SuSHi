@@ -61,3 +61,53 @@ func SaveMachine(config models.Config, machine models.Machine, username string) 
 	return nil
 
 }
+
+
+func GetMachines(config models.Config, user_id string, owner_type string) ([]models.Machine, error) {
+	var machines []models.Machine
+
+	rows, err := config.DB.Query(context.Background(), "SELECT id, name, username, hostname, port, encrypted_private_key, iv_private_key, encrypted_passphrase, iv_passphrase FROM machines WHERE owner_id = $1 AND owner_type = $2", user_id, owner_type)
+
+	if err != nil {
+		log.Error().Msgf("Error fetching machines from database: %v", err)
+		return machines, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var machine models.Machine
+		err := rows.Scan(&machine.ID, &machine.Name, &machine.Username, &machine.Hostname, &machine.Port, &machine.PrivateKey, &machine.IvPrivateKey, &machine.Passphrase, &machine.IvPassphrase)
+		if err != nil {
+			log.Error().Msgf("Error scanning machine from database: %v", err)
+			return machines, err
+		}
+		machines = append(machines, machine)
+	}
+
+	return machines, nil
+}
+
+func GetMachinesByFilter(config models.Config, user_id string, owner_type string) ([]models.FilterMachine, error) {
+	var machines []models.FilterMachine
+
+	rows, err := config.DB.Query(context.Background(), "SELECT id, name, username, hostname, port, owner_id, owner_type FROM machines WHERE owner_id = $1 AND owner_type = $2", user_id, owner_type)
+
+	if err != nil {
+		log.Error().Msgf("Error fetching machines from database: %v", err)
+		return machines, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var machine models.FilterMachine
+		err := rows.Scan(&machine.ID, &machine.Name, &machine.Username, &machine.Hostname, &machine.Port, &machine.OwnerID, &machine.OwnerType)
+		if err != nil {
+			log.Error().Msgf("Error scanning machine from database: %v", err)
+			return machines, err
+		}
+		machines = append(machines, machine)
+	}
+
+	return machines, nil
+}
+

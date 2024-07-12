@@ -52,8 +52,29 @@ func CreateMachine(config models.Config, w http.ResponseWriter, r *http.Request)
 
 
 func GetMachines(config models.Config, w http.ResponseWriter, r *http.Request){
-	// test response
-	utils.ResponseHelper(w, http.StatusOK, "Machines fetched successfully", nil)
+	
+	
+	// fetch username from jwt token
+	username,err:=utils.GetUsernameFromToken(r)
+	if err != nil {
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching username from token", err)
+		return
+	}
+	log.Debug().Msg("Username: "+username)
+
+	// fetch machines from database
+	machines,err:=database.GetMachinesByFilter(config, username,"user")
+	if err != nil {
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching machines from database", err)
+		return
+	}
+
+	
+
+	
+
+
+	utils.ResponseHelper(w, http.StatusOK, "Machines fetched successfully", machines)
 }
 
 func GetMachine(config models.Config, w http.ResponseWriter, r *http.Request){
