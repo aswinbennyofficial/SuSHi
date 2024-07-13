@@ -2,9 +2,11 @@ package database
 
 import (
 	"context"
+	"errors"
 
 	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/aswinbennyofficial/SuSHi/utils"
+	"github.com/jackc/pgx/v5"
 	"github.com/rs/zerolog/log"
 )
 
@@ -87,7 +89,7 @@ func GetMachines(config models.Config, user_id string, owner_type string) ([]mod
 	return machines, nil
 }
 
-func GetMachinesByFilter(config models.Config, user_id string, owner_type string) ([]models.FilterMachine, error) {
+func GetMachinesBasicInfo(config models.Config, user_id string, owner_type string) ([]models.FilterMachine, error) {
 	var machines []models.FilterMachine
 
 	rows, err := config.DB.Query(context.Background(), "SELECT id, name, username, hostname, port, owner_id, owner_type FROM machines WHERE owner_id = $1 AND owner_type = $2", user_id, owner_type)
@@ -111,3 +113,43 @@ func GetMachinesByFilter(config models.Config, user_id string, owner_type string
 	return machines, nil
 }
 
+
+func GetAMachineBasicInfo(config models.Config, machine_id string, user_id string, owner_type string) (models.FilterMachine, error) {
+	var machine models.FilterMachine
+
+	err := config.DB.QueryRow(context.Background(), "SELECT id, name, username, hostname, port, owner_id, owner_type FROM machines WHERE id = $1 AND owner_id = $2 AND owner_type = $3", machine_id,user_id,owner_type).Scan(&machine.ID, &machine.Name, &machine.Username, &machine.Hostname, &machine.Port, &machine.OwnerID, &machine.OwnerType)
+
+	
+
+	if err != nil {
+
+		if err == pgx.ErrNoRows {
+			log.Error().Msgf("Machine not found in database")
+			return machine, errors.New("machine not found in database")
+		}
+
+		log.Error().Msgf("Error fetching machine from database: %v", err)
+		return machine, err
+	}
+
+	return machine, nil
+}
+
+func GetAMachine(config models.Config, machine_id string, user_id string, owner_type string) (models.Machine, error) {
+	var machine models.Machine
+
+	err := config.DB.QueryRow(context.Background(), "SELECT id, name, username, hostname, port, encrypted_private_key, iv_private_key, encrypted_passphrase, iv_passphrase FROM machines WHERE id = $1 AND owner_id = $2 AND owner_type = $3", machine_id,user_id,owner_type).Scan(&machine.ID, &machine.Name, &machine.Username, &machine.Hostname, &machine.Port, &machine.PrivateKey, &machine.IvPrivateKey, &machine.Passphrase, &machine.IvPassphrase)
+
+	if err != nil {
+
+		if err == pgx.ErrNoRows {
+			log.Error().Msgf("Machine not found in database")
+			return machine, errors.New("machine not found in database")
+		}
+
+		log.Error().Msgf("Error fetching machine from database: %v", err)
+		return machine, err
+	}
+
+	return machine, nil
+}

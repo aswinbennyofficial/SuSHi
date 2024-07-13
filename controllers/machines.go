@@ -8,6 +8,7 @@ import (
 	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/aswinbennyofficial/SuSHi/utils"
 	"github.com/rs/zerolog/log"
+	"github.com/go-chi/chi/v5"
 )
 
 func CreateMachine(config models.Config, w http.ResponseWriter, r *http.Request){
@@ -63,7 +64,7 @@ func GetMachines(config models.Config, w http.ResponseWriter, r *http.Request){
 	log.Debug().Msg("Username: "+username)
 
 	// fetch machines from database
-	machines,err:=database.GetMachinesByFilter(config, username,"user")
+	machines,err:=database.GetMachinesBasicInfo(config, username,"user")
 	if err != nil {
 		utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching machines from database", err)
 		return
@@ -79,9 +80,36 @@ func GetMachines(config models.Config, w http.ResponseWriter, r *http.Request){
 
 func GetMachine(config models.Config, w http.ResponseWriter, r *http.Request){
 	
-	// test response
-	utils.ResponseHelper(w, http.StatusOK, "Machine fetched successfully", nil)
+	// fetch username from jwt token
+	username,err:=utils.GetUsernameFromToken(r)
+	if err != nil {
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching username from token", err)
+		return
+	}
+	log.Debug().Msg("Username: "+username)
+
+	// fetch machine id from url params
+	machineID := chi.URLParam(r, "id")
+
+	log.Debug().Msg("Machine ID: "+machineID)
+
+	// fetch machine from database
+	machine,err:=database.GetAMachineBasicInfo(config, machineID, username, "user")
+	if err != nil {
+
+		if err.Error()=="machine not found in database"{
+			utils.ResponseHelper(w, http.StatusNotFound, "Machine not found in database", nil)
+			return
+		}
+
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching machine from database", err)
+		return
+	}
+	
+	utils.ResponseHelper(w, http.StatusOK, "Machine fetched successfully", machine)
 }
+
+
 
 func DeleteMachine(config models.Config, w http.ResponseWriter, r *http.Request){
 	utils.ResponseHelper(w, http.StatusOK, "Machine deleted successfully", nil)
