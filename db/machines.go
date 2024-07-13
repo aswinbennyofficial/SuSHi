@@ -153,3 +153,14 @@ func GetAMachine(config models.Config, machine_id string, user_id string, owner_
 
 	return machine, nil
 }
+
+
+func DeleteMachine(config models.Config, machine_id string, user_id string, owner_type string) error {
+	_, err := config.DB.Exec(context.Background(), "DELETE FROM machines WHERE id = $1 AND owner_id = $2 AND owner_type = $3", machine_id, user_id, owner_type)
+	if err != nil {
+		log.Error().Msgf("Error deleting machine from database: %v", err)
+		return err
+	}
+	log.Debug().Msg("Machine deleted from database")
+	return nil
+}

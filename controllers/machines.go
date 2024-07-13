@@ -112,5 +112,26 @@ func GetMachine(config models.Config, w http.ResponseWriter, r *http.Request){
 
 
 func DeleteMachine(config models.Config, w http.ResponseWriter, r *http.Request){
+	// fetch username from jwt token
+	username,err:=utils.GetUsernameFromToken(r)
+	if err != nil {
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching username from token", err)
+		return
+	}
+	log.Debug().Msg("Username: "+username)
+
+	// fetch machine id from url params
+	machineID := chi.URLParam(r, "id")
+
+	log.Debug().Msg("Machine ID: "+machineID)
+
+	// delete machine from database
+	err=database.DeleteMachine(config, machineID, username, "user")
+	if err != nil {
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error deleting machine from database", err)
+		return
+	}
+
+
 	utils.ResponseHelper(w, http.StatusOK, "Machine deleted successfully", nil)
 }
