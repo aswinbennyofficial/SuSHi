@@ -12,7 +12,7 @@ import (
 )
 
 func CreateMachine(config models.Config, w http.ResponseWriter, r *http.Request){
-	var machine models.Machine
+	var machine models.MachineRequest
 	decoder := json.NewDecoder(r.Body)
 	decoder.Decode(&machine)
 
@@ -134,4 +134,46 @@ func DeleteMachine(config models.Config, w http.ResponseWriter, r *http.Request)
 
 
 	utils.ResponseHelper(w, http.StatusOK, "Machine deleted successfully", nil)
+}
+
+
+func ConnectMachine(config models.Config, w http.ResponseWriter, r *http.Request){
+	username,err:=utils.GetUsernameFromToken(r)
+	if err != nil {
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching username from token", err)
+		return
+	}
+	log.Debug().Msg("Username: "+username)
+
+	// fetch machine id from url params
+	machineID := chi.URLParam(r, "id")
+
+	log.Debug().Msg("Machine ID: "+machineID)
+
+	// get password from post request
+	var requestBody models.ConnectionRequest
+
+	err=json.NewDecoder(r.Body).Decode(&requestBody)
+	if err !=nil{
+		log.Debug().Msg("Error decoding post body"+err.Error())
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error decoding post body", err)
+	}
+
+	log.Debug().Msg("Password: "+requestBody.Password)
+	
+
+
+	machine,err:=database.GetAMachine(config,machineID,username,"user",requestBody.Password)
+	if err != nil {
+		if err.Error()=="machine not found in database"{
+			utils.ResponseHelper(w, http.StatusNotFound, "Machine not found in database", nil)
+			return
+		}
+
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching machine from database", err)
+		return
+	}
+
+
+	utils.ResponseHelper(w, http.StatusOK, "Machine fetched successfully", machine)
 }

@@ -11,7 +11,7 @@ import (
 )
 
 
-func SaveMachine(config models.Config, machine models.Machine, username string) (error) {
+func SaveMachine(config models.Config, machine models.MachineRequest, username string) (error) {
 	// fetch salt from database
 	var salt string
 	err := config.DB.QueryRow(context.Background(), "SELECT salt FROM users WHERE username = $1", username).Scan(&salt)
@@ -135,7 +135,7 @@ func GetAMachineBasicInfo(config models.Config, machine_id string, user_id strin
 	return machine, nil
 }
 
-func GetAMachine(config models.Config, machine_id string, user_id string, owner_type string) (models.Machine, error) {
+func GetAMachine(config models.Config, machine_id string, user_id string, owner_type string, password string) (models.Machine, error) {
 	var machine models.Machine
 
 	err := config.DB.QueryRow(context.Background(), "SELECT id, name, username, hostname, port, encrypted_private_key, iv_private_key, encrypted_passphrase, iv_passphrase FROM machines WHERE id = $1 AND owner_id = $2 AND owner_type = $3", machine_id,user_id,owner_type).Scan(&machine.ID, &machine.Name, &machine.Username, &machine.Hostname, &machine.Port, &machine.PrivateKey, &machine.IvPrivateKey, &machine.Passphrase, &machine.IvPassphrase)
@@ -151,6 +151,30 @@ func GetAMachine(config models.Config, machine_id string, user_id string, owner_
 		return machine, err
 	}
 
+	// decrypt private key
+	// fetch salt from database
+	var salt string
+	err = config.DB.QueryRow(context.Background(), "SELECT salt FROM users WHERE username = $1", user_id).Scan(&salt)
+	if err != nil {
+		log.Error().Msgf("Error fetching salt from database: %v", err)
+		return machine, err
+	}
+
+	machine.PrivateKey,err=utils.DecryptString(machine.PrivateKey, machine.IvPrivateKey, password, salt)
+	if err != nil {
+		log.Error().Msgf("Error decrypting private key: %v", err)
+		return machine, err
+	}
+
+	if machine.Passphrase!=""{
+		log.Debug().Msg("Passphrase:"+machine.Passphrase)
+		machine.Passphrase,err=utils.DecryptString(machine.Passphrase, machine.IvPassphrase, password, salt)
+		if err != nil {
+			log.Error().Msgf("Error decrypting passphrase: %v", err)
+			return machine, err
+		}
+	}
+
 	return machine, nil
 }
 
@@ -164,3 +188,4 @@ func DeleteMachine(config models.Config, machine_id string, user_id string, owne
 	log.Debug().Msg("Machine deleted from database")
 	return nil
 }
+

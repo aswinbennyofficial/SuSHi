@@ -8,7 +8,7 @@ type Response struct {
 
 
 // Machine struct
-type Machine struct {
+type MachineRequest struct {
 	ID         int    `json:"id"` 
 	Name       string `json:"name"`
     Username   string `json:"username"`
@@ -20,4 +20,8 @@ type Machine struct {
     IvPassphrase string `json:"iv_passphrase"`
     Password   string `json:"password"`
 	Organization string `json:"organization"`
+}
+
+type ConnectionRequest struct{
+	Password string `json:"password"`
 }

@@ -32,6 +32,11 @@ func loadMachineRoutes(r chi.Router, config models.Config){
 		
 	})
 
+	r.Post("/machine/{id}/connect", func(w http.ResponseWriter, r *http.Request) {
+		controllers.ConnectMachine(config, w, r)
+		
+	})
+
 	
 
 

@@ -6,7 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
-	"errors"
+	// "errors"
 
 	"golang.org/x/crypto/pbkdf2"
 	"github.com/rs/zerolog/log"
@@ -56,6 +56,7 @@ func DecryptString(encodedCiphertext, encodedIV, password, salt string) (string,
 	// Decode base64 ciphertext and IV
     ciphertext, err := base64.StdEncoding.DecodeString(encodedCiphertext)
     if err != nil {
+		log.Error().Msgf("Error decoding base64 ciphertext: %v", err)
         return "", err
     }
     ivString, err := base64.StdEncoding.DecodeString(encodedIV)
@@ -69,13 +70,14 @@ func DecryptString(encodedCiphertext, encodedIV, password, salt string) (string,
     // create a new cipher block
     block, err := aes.NewCipher(key)
     if err != nil {
+		log.Error().Msgf("Error creating new cipher block: %v", err)
         return "", err
     }
 
     // Decrypt the text
-    if len(ciphertext) < aes.BlockSize {
-        return "", errors.New("ciphertext too short")
-    }
+    // if len(ciphertext) < aes.BlockSize {
+    //     return "", errors.New("ciphertext too short")
+    // }
 
     plaintext := make([]byte, len(ciphertext))
     stream := cipher.NewCFBDecrypter(block, ivString)
