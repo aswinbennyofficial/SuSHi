@@ -9,6 +9,7 @@ import (
 	"github.com/aswinbennyofficial/SuSHi/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 func CreateMachine(config models.Config, w http.ResponseWriter, r *http.Request){
@@ -174,6 +175,25 @@ func ConnectMachine(config models.Config, w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// use ssh to connect to machine
+	sshClient,err:=utils.ConnectToMachine(machine)
+	if err != nil {
+		utils.ResponseHelper(w, http.StatusInternalServerError, "Error connecting to machine", err)
+		return
+	}
+	log.Debug().Msg("Connected to machine successfully")
 
-	utils.ResponseHelper(w, http.StatusOK, "Machine fetched successfully", machine)
+	// generate uuid
+	uuid := uuid.New().String()
+	log.Debug().Msg("UUID: "+uuid)
+
+	// store ssh connection
+	utils.StoreSSHConnection(uuid, models.SSHConnection{Username: username, Client: sshClient})
+	log.Debug().Msg("SSH connection stored successfully")
+
+	// send response
+	utils.ResponseHelper(w, http.StatusOK, "Connected to machine successfully", uuid)
+
+
+	// utils.ResponseHelper(w, http.StatusOK, "Machine fetched successfully", machine)
 }
