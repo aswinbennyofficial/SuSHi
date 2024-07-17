@@ -21,7 +21,9 @@
         const term = new Terminal();
         term.open(document.getElementById('terminal-container'));
 
-        const wsURL = `ws://${window.location.host}/ssh`;
+        // const wsURL = `ws://${window.location.host}/ssh?uuid=412584b3-81ce-409c-a8f1-62d1268fec73`;
+        const wsURL = `ws://localhost:8080/ssh?uuid=31f9cb9c-46b7-4f55-b166-228be0818d32`;
+
         const ws = new WebSocket(wsURL);
 
         ws.onopen = () => {

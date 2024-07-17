@@ -2,9 +2,12 @@ package controllers
 
 import (
 	"net/http"
+	// "os/user"
 	"sync"
 
 	"github.com/aswinbennyofficial/SuSHi/models"
+	"github.com/aswinbennyofficial/SuSHi/utils"
+	// "github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/ssh"
@@ -25,33 +28,33 @@ func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Req
 	}
 	defer conn.Close()
 
-	// Hardcoded SSH access values (replace with your actual values)
-	sshHost := config.SSHConfig.SSHHost
-	sshPort := config.SSHConfig.SSHPort
-	sshUser := config.SSHConfig.SSHUser
-	privateKey := config.SSHConfig.PrivateKey
-
-	// Parse the private key
-	signer, err := ssh.ParsePrivateKey([]byte(privateKey))
-	if err != nil {
-		log.Fatal().Msgf("Failed to parse private key: %v", err)
+	uuid := r.URL.Query().Get("uuid")
+	log.Debug().Msgf("UUID: %s", uuid)
+	sshConnection,exists := utils.GetSSHConnection(uuid)
+	if !exists {
+		log.Printf("No SSH connection found for UUID: %s", uuid)
+		// utils.ResponseHelper(w, http.StatusNotFound, "No SSH connection found for UUID", nil)
+		return
 	}
 
-	sshconfig := &ssh.ClientConfig{
-		User: sshUser,
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeys(signer),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
+	
 
-	// Connect to SSH server
-	client, err := ssh.Dial("tcp", sshHost+":"+sshPort, sshconfig)
-	if err != nil {
-		log.Fatal().Msgf("Failed to dial SSH server: %v", err)
-	}
+	// username,err := utils.GetUsernameFromToken(r)
+	// if err != nil {
+	// 	log.Printf("Error fetching username from token: %v", err)
+	// 	// utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching username from token", err)
+	// 	return
+	// }
+	// if sshConnection.Username != username {
+	// 	log.Printf("User does not have permission to access this SSH connection")
+	// 	// utils.ResponseHelper(w, http.StatusForbidden, "User does not have permission to access this SSH connection", nil)
+	// 	return
+	// }
+
+	client := sshConnection.Client
 	defer client.Close()
 
+	
 	// Open a session
 	session, err := client.NewSession()
 	if err != nil {
