@@ -1,10 +1,12 @@
 package models
 
 import (
+	"time"
+
 	"golang.org/x/crypto/ssh"
 )
 
 type SSHConnection struct {
-	Username string
+	TimeBucketKey time.Time
 	Client   *ssh.Client
 }

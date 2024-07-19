@@ -3,13 +3,14 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	database "github.com/aswinbennyofficial/SuSHi/db"
 	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/aswinbennyofficial/SuSHi/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 func CreateMachine(config models.Config, w http.ResponseWriter, r *http.Request){
@@ -188,7 +189,7 @@ func ConnectMachine(config models.Config, w http.ResponseWriter, r *http.Request
 	log.Debug().Msg("UUID: "+uuid)
 
 	// store ssh connection
-	utils.StoreSSHConnection(uuid, models.SSHConnection{Username: username, Client: sshClient})
+	utils.StoreSSHConnection(uuid, &models.SSHConnection{TimeBucketKey: utils.RoundToNearestMinute(time.Now()), Client: sshClient})
 	log.Debug().Msg("SSH connection stored successfully")
 
 	// send response

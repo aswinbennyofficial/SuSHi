@@ -5,7 +5,7 @@ import (
 	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/rs/zerolog/log"
 	"fmt"
-	"sync"
+	
 )
 
 // PublicKeyFile returns an ssh.AuthMethod that uses the private key file
@@ -55,26 +55,3 @@ func ConnectToMachine(machine models.Machine) (*ssh.Client, error) {
 
 
 
-var sshConnections = struct {
-	sync.RWMutex
-	connections map[string]models.SSHConnection
-}{connections: make(map[string]models.SSHConnection)}
-
-func StoreSSHConnection(uuid string, conn models.SSHConnection) {
-	sshConnections.Lock()
-	defer sshConnections.Unlock()
-	sshConnections.connections[uuid] = conn
-}
-
-func GetSSHConnection(uuid string) (models.SSHConnection, bool) {
-	sshConnections.RLock()
-	defer sshConnections.RUnlock()
-	conn, exists := sshConnections.connections[uuid]
-	return conn, exists
-}
-
-func DeleteSSHConnection(uuid string) {
-	sshConnections.Lock()
-	defer sshConnections.Unlock()
-	delete(sshConnections.connections, uuid)
-}
