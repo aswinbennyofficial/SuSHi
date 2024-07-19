@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"io"
 	"net/http"
 	// "os/user"
 	"sync"
 
 	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/aswinbennyofficial/SuSHi/utils"
+
 	// "github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
@@ -37,22 +39,9 @@ func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	
-
-	// username,err := utils.GetUsernameFromToken(r)
-	// if err != nil {
-	// 	log.Printf("Error fetching username from token: %v", err)
-	// 	// utils.ResponseHelper(w, http.StatusInternalServerError, "Error fetching username from token", err)
-	// 	return
-	// }
-	// if sshConnection.Username != username {
-	// 	log.Printf("User does not have permission to access this SSH connection")
-	// 	// utils.ResponseHelper(w, http.StatusForbidden, "User does not have permission to access this SSH connection", nil)
-	// 	return
-	// }
 
 	client := sshConnection.Client
-	defer client.Close()
+	
 
 	
 	// Open a session
@@ -62,32 +51,14 @@ func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Req
 	}
 	defer session.Close()
 
-	// Allocate a pseudo terminal
-	modes := ssh.TerminalModes{
-		ssh.ECHO:          1,
-		ssh.TTY_OP_ISPEED: 14400,
-		ssh.TTY_OP_OSPEED: 14400,
-	}
-
-	// Request a pseudo terminal
-	err = session.RequestPty("xterm", 80, 40, modes)
-	if err != nil {
-		log.Fatal().Msgf("Failed to request pseudo terminal: %v", err)
-	}
+	allocatePseudoTerminal(session)
 
 	// Set up pipes for stdin, stdout, and stderr
-	stdin, err := session.StdinPipe()
+	stdin,stdout,err := getSessionPipe(session)
 	if err != nil {
-		log.Fatal().Msgf("Failed to create stdin pipe: %v", err)
+		log.Fatal().Msgf("Failed to set up pipes: %v", err)
 	}
-	stdout, err := session.StdoutPipe()
-	if err != nil {
-		log.Fatal().Msgf("Failed to create stdout pipe: %v", err)
-	}
-	// stderr, err := session.StderrPipe()
-	if err != nil {
-		log.Fatal().Msgf("Failed to create stderr pipe: %v", err)
-	}
+	
 
 	// Start remote shell
 	err = session.Shell()
@@ -100,8 +71,48 @@ func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Req
 	wg.Add(2)
 
 	// Goroutine to read from WebSocket and write to SSH stdin
-	go func() {
-		defer wg.Done()
+	go readFromWebSocket(conn, stdin,&wg)
+
+	// Goroutine to read from SSH stdout and write to WebSocket
+	go writeToWebSocket(conn, stdout,&wg)
+
+	// Wait for goroutines to finish
+	wg.Wait()
+}
+
+func getSessionPipe(session *ssh.Session)(io.WriteCloser, io.Reader, error){
+	stdin, err := session.StdinPipe()
+	if err != nil {
+		return nil,nil,err
+	}
+	stdout, err := session.StdoutPipe()
+	if err != nil {
+		return nil,nil,err
+	}
+
+	return stdin,stdout,nil
+	
+}
+
+func allocatePseudoTerminal(session *ssh.Session)(error){
+	// Allocate a pseudo terminal
+	modes := ssh.TerminalModes{
+		ssh.ECHO:          1,
+		ssh.TTY_OP_ISPEED: 14400,
+		ssh.TTY_OP_OSPEED: 14400,
+	}
+
+	// Request a pseudo terminal
+	err := session.RequestPty("xterm", 80, 40, modes)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func readFromWebSocket(conn *websocket.Conn, stdin io.WriteCloser,wg *sync.WaitGroup) {
+	defer wg.Done()
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err != nil {
@@ -114,11 +125,10 @@ func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Req
 				return
 			}
 		}
-	}()
+}
 
-	// Goroutine to read from SSH stdout and write to WebSocket
-	go func() {
-		defer wg.Done()
+func writeToWebSocket(conn *websocket.Conn, stdout io.Reader,wg *sync.WaitGroup) {
+	defer wg.Done()
 		buf := make([]byte, 1024)
 		for {
 			n, err := stdout.Read(buf)
@@ -132,8 +142,4 @@ func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Req
 				return
 			}
 		}
-	}()
-
-	// Wait for goroutines to finish
-	wg.Wait()
 }

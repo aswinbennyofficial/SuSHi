@@ -8,3 +8,7 @@ SuSHI is a web-based tool that allows users to securely connect to remote machin
 - Real-Time Communication: Utilize WebSockets for real-time communication between the client and server.
 - User-Friendly Interface: Simple and intuitive interface for ease of use.
 - Encrypted Private Keys: Private keys are stored in database securely using AES-CFB encryption with a key derived from PBKDF2-HMAC-SHA256 (10000 iterations), utilizing a unique salt and IV for each encryption operation.
+
+
+### Screenshot
+![screenhot 1](./static/images/image.png)
