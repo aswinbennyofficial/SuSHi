@@ -25,3 +25,8 @@ type MachineRequest struct {
 type ConnectionRequest struct{
 	Password string `json:"password"`
 }
+
+type Message struct {
+    Type string `json:"type"`
+    Data string `json:"data"`
+}

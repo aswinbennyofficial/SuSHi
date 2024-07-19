@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
+	"time"
+
 	// "os/user"
 	"sync"
 
@@ -47,7 +50,7 @@ func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Req
 	// Open a session
 	session, err := client.NewSession()
 	if err != nil {
-		log.Fatal().Msgf("Failed to create session: %v", err)
+		log.Error().Msgf("Failed to create session: %v", err)
 	}
 	defer session.Close()
 
@@ -56,14 +59,14 @@ func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Req
 	// Set up pipes for stdin, stdout, and stderr
 	stdin,stdout,err := getSessionPipe(session)
 	if err != nil {
-		log.Fatal().Msgf("Failed to set up pipes: %v", err)
+		log.Error().Msgf("Failed to set up pipes: %v", err)
 	}
 	
 
 	// Start remote shell
 	err = session.Shell()
 	if err != nil {
-		log.Fatal().Msgf("Failed to start shell: %v", err)
+		log.Error().Msgf("Failed to start shell: %v", err)
 	}
 
 	// Wait group for managing goroutines
@@ -71,7 +74,7 @@ func HandleSSHConnection(config models.Config,w http.ResponseWriter, r *http.Req
 	wg.Add(2)
 
 	// Goroutine to read from WebSocket and write to SSH stdin
-	go readFromWebSocket(conn, stdin,&wg)
+	go readFromWebSocket(conn, stdin,&wg, uuid)
 
 	// Goroutine to read from SSH stdout and write to WebSocket
 	go writeToWebSocket(conn, stdout,&wg)
@@ -111,20 +114,35 @@ func allocatePseudoTerminal(session *ssh.Session)(error){
 	return nil
 }
 
-func readFromWebSocket(conn *websocket.Conn, stdin io.WriteCloser,wg *sync.WaitGroup) {
-	defer wg.Done()
-		for {
-			_, msg, err := conn.ReadMessage()
-			if err != nil {
-				log.Printf("Error reading WebSocket message: %v", err)
-				return
-			}
-			_, err = stdin.Write(msg)
-			if err != nil {
-				log.Printf("Error writing to SSH stdin: %v", err)
-				return
-			}
-		}
+func readFromWebSocket(conn *websocket.Conn, stdin io.WriteCloser, wg *sync.WaitGroup, uuid string) {
+    defer wg.Done()
+    for {
+        _, msg, err := conn.ReadMessage()
+        if err != nil {
+            log.Error().Err(err).Msg("Error reading WebSocket message")
+            return
+        }
+
+        var message models.Message
+        err = json.Unmarshal(msg, &message)
+        if err != nil {
+            log.Error().Err(err).Msg("Error unmarshaling message")
+            continue
+        }
+
+        switch message.Type {
+        case "heartbeat":
+            now := utils.RoundToNearestMinute(time.Now())
+            utils.UpdateTimeBucket(now, uuid)
+            log.Debug().Str("UUID", uuid).Time("Timestamp", now).Msg("Heartbeat received, time bucket updated")
+        default:
+            _, err = stdin.Write([]byte(message.Data))
+            if err != nil {
+                log.Error().Err(err).Msg("Error writing to SSH stdin")
+                return
+            }
+        }
+    }
 }
 
 func writeToWebSocket(conn *websocket.Conn, stdout io.Reader,wg *sync.WaitGroup) {

@@ -67,7 +67,8 @@ func main() {
 		return
 	}
 
-	
+	// Start goroutine to remove expired ssh connections
+	go utils.CheckExpiredBuckets()
 	
 	
 

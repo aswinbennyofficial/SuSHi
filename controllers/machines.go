@@ -189,8 +189,10 @@ func ConnectMachine(config models.Config, w http.ResponseWriter, r *http.Request
 	log.Debug().Msg("UUID: "+uuid)
 
 	// store ssh connection
-	utils.StoreSSHConnection(uuid, &models.SSHConnection{TimeBucketKey: utils.RoundToNearestMinute(time.Now()), Client: sshClient})
-	log.Debug().Msg("SSH connection stored successfully")
+	timeKey:=utils.RoundToNearestMinute(time.Now())
+	utils.StoreSSHConnection(uuid, &models.SSHConnection{TimeBucketKey: timeKey, Client: sshClient})
+	utils.StoreInTimeBucket(timeKey, uuid)
+	log.Debug().Msg("SSH connection stored successfully"+uuid+" "+timeKey.String())
 
 	// send response
 	utils.ResponseHelper(w, http.StatusOK, "Connected to machine successfully", uuid)
