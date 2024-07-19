@@ -10,11 +10,16 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: sushi
-    # volumes:
-    #   - ./data:/var/lib/postgresql/data
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
     restart: always
    
-
+  redis:
+    image: redis/redis-stack:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
     
 
   sushi-backend:
@@ -24,18 +29,15 @@ services:
     environment:
       - SERVER_PORT=8080
       - LOG_LEVEL=Debug
-      - JWT_SECRET=secret123
+      - JWT_SECRET=
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=sushi
-      - SSH_HOST=
-      - SSH_PORT=22
-      - SSH_USER=
-      - |
-        SSH_PRIVATE_KEY=
-      - MIGRATE_DB=false 
+      - DB_USER=
+      - DB_PASSWORD=
+      - DB_NAME=
+      - MIGRATE_DB=true 
+    # volumes:
+    #   - ./static:/app/static
     depends_on:
       - postgres
     restart: always
