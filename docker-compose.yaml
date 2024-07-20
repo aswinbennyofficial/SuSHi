@@ -14,12 +14,12 @@ services:
       - ./db/data:/var/lib/postgresql/data
     restart: always
    
-  redis:
-    image: redis/redis-stack:latest
-    container_name: redis
-    ports:
-      - "6379:6379"
-    restart: always
+  # redis:
+  #   image: redis/redis-stack:latest
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+  #   restart: always
     
 
   sushi-backend:

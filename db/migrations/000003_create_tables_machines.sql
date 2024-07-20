@@ -9,7 +9,7 @@ CREATE TABLE machines (
     iv_private_key TEXT,
     encrypted_passphrase TEXT,
     iv_passphrase TEXT,
-    owner_id INTEGER NOT NULL,
+    owner_id UUID NOT NULL,
     owner_type VARCHAR(20) NOT NULL CHECK (owner_type IN ('user','organization')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
