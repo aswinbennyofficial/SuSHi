@@ -3,67 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuSHI v0</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-        #terminal-container {
-            width: 100%;
-            height: 100vh;
-            background-color: black;
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .ubuntu-bold {
+            font-family: "Ubuntu", sans-serif;
+            font-weight: 700;
+        }
+
+        .poppins-medium {
+            font-family: "Poppins", sans-serif;
+            font-weight: 500;
+        }
+
+        .medium-text {
+            font-size: 2rem; /* Adjust the size as needed */
+            line-height: 1.2;
         }
     </style>
 </head>
-<body>
-    <div id="terminal-container"></div>
-    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
-    <script>
-        const term = new Terminal();
-        term.open(document.getElementById('terminal-container'));
-        
-        
-        const wsURL = `ws://localhost:8080/ssh?uuid=db5529a2-0ec5-4921-84e8-30e1eec7120e`;
-        const ws = new WebSocket(wsURL);
+<body class="bg-base-200">
+    <!-- Navbar -->
+    <nav class="navbar bg-base-100 shadow-lg p-4">
+        <div class="navbar-start">
+            <span class="ubuntu-bold poppins-medium medium-text">SuSHi</span>
+        </div>
+        <div class="navbar-end">
+            <a href="#" class="btn btn-primary">Login / Sign Up</a>
+        </div>
+    </nav>
 
-        let heartbeatInterval;
+    <!-- Hero Section -->
+    <div class="hero min-h-screen bg-cover bg-center" style="background-image: url('https://img.daisyui.com/images/stock/photo-1507358522600-9f71e620c44e.webp');">
+        <div class="hero-overlay bg-opacity-60"></div>
+        <div class="hero-content text-neutral-content text-center flex flex-col justify-center items-center h-full p-6">
+            <div class="max-w-md">
+                <h1 class="text-5xl font-bold mb-5">Hello there</h1>
+                <p class="mb-5 text-lg">
+                    Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem
+                    quasi. In deleniti eaque aut repudiandae et a id nisi.
+                </p>
+                <a href="#" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </div>
 
-        function startHeartbeat() {
-            heartbeatInterval = setInterval(() => {
-                console.log('Sending heartbeat...');
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({ type: 'heartbeat', data: '' }));
-                    console.log('Heartbeat sent');
-                }
-            }, 5 * 60 * 1000); // 5 minutes
-        }
 
-        function stopHeartbeat() {
-            clearInterval(heartbeatInterval);
-        }
+     <!-- Content Section -->
+     <div class="container mx-auto px-4 py-8">
+        <p class="text-lg mb-8">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.
+        </p>
+    </div>
 
-        ws.onopen = () => {
-            term.write('Connected to SuSHI v0...\r\n\r\n');
-            term.prompt = '> ';
-            term.onData(data => {
-                ws.send(JSON.stringify({ type: 'data', data: data }));
-            });
-            startHeartbeat();
-        };
+    <!-- Screenshot Slider Section -->
+    <div class="container mx-auto px-4 py-8">
+        <h2 class="text-3xl font-bold mb-4">Screenshots</h2>
+        <div class="carousel w-full">
+            <div id="slide1" class="carousel-item relative w-full">
+                <img src="https://picsum.photos/800/400?random=1" class="w-full" />
+                <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+                    <a href="#slide3" class="btn btn-circle">❮</a> 
+                    <a href="#slide2" class="btn btn-circle">❯</a>
+                </div>
+            </div> 
+            <div id="slide2" class="carousel-item relative w-full">
+                <img src="https://picsum.photos/800/400?random=2" class="w-full" />
+                <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+                    <a href="#slide1" class="btn btn-circle">❮</a> 
+                    <a href="#slide3" class="btn btn-circle">❯</a>
+                </div>
+            </div> 
+            <div id="slide3" class="carousel-item relative w-full">
+                <img src="https://picsum.photos/800/400?random=3" class="w-full" />
+                <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+                    <a href="#slide2" class="btn btn-circle">❮</a> 
+                    <a href="#slide1" class="btn btn-circle">❯</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        ws.onmessage = event => {
-            term.write(event.data);
-        };
+    <!-- Content Section -->
+    <div class="container mx-auto px-4 py-8">
+        <p class="text-lg mb-8">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.
+        </p>
+    </div>
 
-        ws.onerror = event => {
-            term.write(`WebSocket error: ${event}\r\n`);
-        };
-
-        ws.onclose = () => {
-            term.write('Connection closed.\r\n');
-            stopHeartbeat();
-        };
-
-        // Ensure heartbeat is stopped when the page is unloaded
-        window.addEventListener('beforeunload', stopHeartbeat);
-    </script>
+    <!-- footer -->
+    <footer class="footer bg-neutral text-neutral-content p-10">
+        <nav>
+          <h6 class="footer-title">Services</h6>
+          <a class="link link-hover">Branding</a>
+          <a class="link link-hover">Design</a>
+          <a class="link link-hover">Marketing</a>
+          <a class="link link-hover">Advertisement</a>
+        </nav>
+        <nav>
+          <h6 class="footer-title">Company</h6>
+          <a class="link link-hover">About us</a>
+          <a class="link link-hover">Contact</a>
+          <a class="link link-hover">Jobs</a>
+          <a class="link link-hover">Press kit</a>
+        </nav>
+        <nav>
+          <h6 class="footer-title">Legal</h6>
+          <a class="link link-hover">Terms of use</a>
+          <a class="link link-hover">Privacy policy</a>
+          <a class="link link-hover">Cookie policy</a>
+        </nav>
+      </footer>
+    
 </body>
 </html>
