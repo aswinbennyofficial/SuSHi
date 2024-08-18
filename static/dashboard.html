@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -104,7 +104,8 @@
 
     <script>
         const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IjZiMzM4MTU4LTMyY2EtNGI1My1hMjczLWY1NGUzMjQ0Njk3ZSJ9.txNk1ZMTa8Xv8sCk1ebL6KLuCIanaHkVhN_AExdQQCs'; // Replace with your actual JWT
-        const apiUrl = 'http://localhost:8080/api/v1/machines';
+        
+        const apiUrl = '/api/v1/machines';
         let currentMachineId = null;
 
         // Fetch machines
@@ -170,7 +171,7 @@
         }
 
         function deleteMachine(machineId) {
-            fetch(`http://localhost:8080/api/v1/machine/${machineId}`, {
+            fetch(`/api/v1/machine/${machineId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${jwt}`
@@ -199,7 +200,7 @@
                 organization: document.getElementById('new_machine_organization').value
             };
 
-            fetch('http://localhost:8080/api/v1/machine', {
+            fetch('/api/v1/machine', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${jwt}`,
@@ -226,7 +227,7 @@
                 return;
             }
 
-            const connectUrl = `http://localhost:8080/api/v1/machine/${currentMachineId}/connect`;
+            const connectUrl = `/api/v1/machine/${currentMachineId}/connect`;
             fetch(connectUrl, {
                 method: 'POST',
                 headers: {
@@ -239,7 +240,7 @@
             .then(data => {
                 if (data.status === 'OK') {
                     const uuid = data.data;
-                    const terminalUrl = `http://localhost:8080/static/terminal.html?uuid=${uuid}`;
+                    const terminalUrl = `/terminal.html?uuid=${uuid}`;
                     window.open(terminalUrl, '_blank', 'width=800,height=600');
                 } else {
                     console.error('Failed to connect to machine:', data.message);
