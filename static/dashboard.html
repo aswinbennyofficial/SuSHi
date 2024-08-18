@@ -66,41 +66,41 @@
     </form>
 </dialog>
 
-    <!-- Add Machine Modal -->
-    <dialog id="add_machine_modal" class="modal">
-        <form method="dialog" class="modal-box">
-            <h3 class="font-bold text-lg">Add New Machine</h3>
-            <div class="form-control w-full">
-                <label class="label"><span class="label-text">Name</span></label>
-                <input type="text" id="new_machine_name" class="input input-bordered w-full" required>
-                
-                <label class="label"><span class="label-text">Username</span></label>
-                <input type="text" id="new_machine_username" class="input input-bordered w-full" required>
-                
-                <label class="label"><span class="label-text">Hostname</span></label>
-                <input type="text" id="new_machine_hostname" class="input input-bordered w-full" required>
-                
-                <label class="label"><span class="label-text">Port</span></label>
-                <input type="text" id="new_machine_port" class="input input-bordered w-full" required>
-                
-                <label class="label"><span class="label-text">Private Key</span></label>
-                <textarea id="new_machine_private_key" class="textarea textarea-bordered w-full" rows="3"></textarea>
-                
-                <label class="label"><span class="label-text">Passphrase</span></label>
-                <input type="password" id="new_machine_passphrase" class="input input-bordered w-full">
-                
-                <label class="label"><span class="label-text">Password</span></label>
-                <input type="password" id="new_machine_password" class="input input-bordered w-full" required>
-                
-                <label class="label"><span class="label-text">Organization</span></label>
-                <input type="text" id="new_machine_organization" class="input input-bordered w-full">
-            </div>
-            <div class="modal-action">
-                <button class="btn btn-primary" onclick="addNewMachine()">Add Machine</button>
-                <button class="btn">Cancel</button>
-            </div>
-        </form>
-    </dialog>
+   <!-- Add Machine Modal -->
+<dialog id="add_machine_modal" class="modal">
+    <form method="dialog" class="modal-box">
+        <h3 class="font-bold text-lg">Add New Machine</h3>
+        <div class="form-control w-full">
+            <label class="label"><span class="label-text">Name</span></label>
+            <input type="text" id="new_machine_name" class="input input-bordered w-full">
+            
+            <label class="label"><span class="label-text">Username</span></label>
+            <input type="text" id="new_machine_username" class="input input-bordered w-full">
+            
+            <label class="label"><span class="label-text">Hostname</span></label>
+            <input type="text" id="new_machine_hostname" class="input input-bordered w-full">
+            
+            <label class="label"><span class="label-text">Port</span></label>
+            <input type="text" id="new_machine_port" class="input input-bordered w-full">
+            
+            <label class="label"><span class="label-text">Private Key</span></label>
+            <textarea id="new_machine_private_key" class="textarea textarea-bordered w-full" rows="3"></textarea>
+            
+            <label class="label"><span class="label-text">Passphrase</span></label>
+            <input type="password" id="new_machine_passphrase" class="input input-bordered w-full">
+            
+            <label class="label"><span class="label-text">Password</span></label>
+            <input type="password" id="new_machine_password" class="input input-bordered w-full">
+            
+            <label class="label"><span class="label-text">Organization</span></label>
+            <input type="text" id="new_machine_organization" class="input input-bordered w-full">
+        </div>
+        <div class="modal-action">
+            <button type="button" class="btn btn-primary" onclick="addNewMachine()">Add Machine</button>
+            <button type="button" class="btn" id="cancel_add_machine">Cancel</button>
+        </div>
+    </form>
+</dialog>
 
     <script>
         const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IjZiMzM4MTU4LTMyY2EtNGI1My1hMjczLWY1NGUzMjQ0Njk3ZSJ9.txNk1ZMTa8Xv8sCk1ebL6KLuCIanaHkVhN_AExdQQCs'; // Replace with your actual JWT
@@ -189,14 +189,25 @@
         }
 
         function addNewMachine() {
+            const name = document.getElementById('new_machine_name').value;
+            const username = document.getElementById('new_machine_username').value;
+            const hostname = document.getElementById('new_machine_hostname').value;
+            const port = document.getElementById('new_machine_port').value;
+            const password = document.getElementById('new_machine_password').value;
+
+            if (!name || !username || !hostname || !port || !password) {
+                alert("Please fill in all required fields (Name, Username, Hostname, Port, and Password).");
+                return;
+            }
+
             const newMachine = {
-                name: document.getElementById('new_machine_name').value,
-                username: document.getElementById('new_machine_username').value,
-                hostname: document.getElementById('new_machine_hostname').value,
-                port: document.getElementById('new_machine_port').value,
+                name: name,
+                username: username,
+                hostname: hostname,
+                port: port,
                 private_key: document.getElementById('new_machine_private_key').value,
                 passphrase: document.getElementById('new_machine_passphrase').value,
-                password: document.getElementById('new_machine_password').value,
+                password: password,
                 organization: document.getElementById('new_machine_organization').value
             };
 
@@ -250,6 +261,19 @@
 
             document.getElementById('password_modal').close();
             document.getElementById('machine_password').value = '';
+        });
+
+        document.getElementById('cancel_add_machine').addEventListener('click', function() {
+            document.getElementById('add_machine_modal').close();
+            // Clear all input fields
+            document.getElementById('new_machine_name').value = '';
+            document.getElementById('new_machine_username').value = '';
+            document.getElementById('new_machine_hostname').value = '';
+            document.getElementById('new_machine_port').value = '';
+            document.getElementById('new_machine_private_key').value = '';
+            document.getElementById('new_machine_passphrase').value = '';
+            document.getElementById('new_machine_password').value = '';
+            document.getElementById('new_machine_organization').value = '';
         });
     </script>
 </body>
