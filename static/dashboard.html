@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .ubuntu-bold {
+            font-family: "Ubuntu", sans-serif;
+            font-weight: 700;
+        }
+
+        .poppins-medium {
+            font-family: "Poppins", sans-serif;
+            font-weight: 500;
+        }
+
+        .medium-text {
+            font-size: 2rem; /* Adjust the size as needed */
+            line-height: 1.2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar bg-base-100 shadow-lg p-4">
+        <div class="navbar-start">
+            <span class="ubuntu-bold poppins-medium medium-text">SuSHi</span>
+        </div>
+        <div class="navbar-end">
+            <button class="btn btn-primary" onclick="document.getElementById('add_machine_modal').showModal()">Add machine</button>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">Machine Dashboard</h1>
+        <div id="machine-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+
+   <!-- Password Modal -->
+   <dialog id="password_modal" class="modal">
+    <form method="dialog" class="modal-box">
+        <h3 class="font-bold text-lg">Enter Password</h3>
+        <div class="form-control w-full max-w-xs">
+            <label class="label">
+                <span class="label-text">Password for the machine:</span>
+            </label>
+            <input type="password" id="machine_password" class="input input-bordered w-full max-w-xs" />
+        </div>
+        <div class="modal-action">
+            <button class="btn btn-primary" id="connect_button">Connect</button>
+            <button class="btn">Cancel</button>
+        </div>
+    </form>
+</dialog>
+
+    <!-- Add Machine Modal -->
+    <dialog id="add_machine_modal" class="modal">
+        <form method="dialog" class="modal-box">
+            <h3 class="font-bold text-lg">Add New Machine</h3>
+            <div class="form-control w-full">
+                <label class="label"><span class="label-text">Name</span></label>
+                <input type="text" id="new_machine_name" class="input input-bordered w-full" required>
+                
+                <label class="label"><span class="label-text">Username</span></label>
+                <input type="text" id="new_machine_username" class="input input-bordered w-full" required>
+                
+                <label class="label"><span class="label-text">Hostname</span></label>
+                <input type="text" id="new_machine_hostname" class="input input-bordered w-full" required>
+                
+                <label class="label"><span class="label-text">Port</span></label>
+                <input type="text" id="new_machine_port" class="input input-bordered w-full" required>
+                
+                <label class="label"><span class="label-text">Private Key</span></label>
+                <textarea id="new_machine_private_key" class="textarea textarea-bordered w-full" rows="3"></textarea>
+                
+                <label class="label"><span class="label-text">Passphrase</span></label>
+                <input type="password" id="new_machine_passphrase" class="input input-bordered w-full">
+                
+                <label class="label"><span class="label-text">Password</span></label>
+                <input type="password" id="new_machine_password" class="input input-bordered w-full" required>
+                
+                <label class="label"><span class="label-text">Organization</span></label>
+                <input type="text" id="new_machine_organization" class="input input-bordered w-full">
+            </div>
+            <div class="modal-action">
+                <button class="btn btn-primary" onclick="addNewMachine()">Add Machine</button>
+                <button class="btn">Cancel</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script>
+        const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IjZiMzM4MTU4LTMyY2EtNGI1My1hMjczLWY1NGUzMjQ0Njk3ZSJ9.txNk1ZMTa8Xv8sCk1ebL6KLuCIanaHkVhN_AExdQQCs'; // Replace with your actual JWT
+        const apiUrl = 'http://localhost:8080/api/v1/machines';
+        let currentMachineId = null;
+
+        // Fetch machines
+        function fetchMachines() {
+            fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'OK') {
+                    displayMachines(data.data);
+                } else {
+                    console.error('Failed to fetch machines:', data.message);
+                }
+            })
+            .catch(error => console.error('Error fetching machines:', error));
+        }
+
+        fetchMachines();
+
+        function displayMachines(machines) {
+            const machineList = document.getElementById('machine-list');
+            machineList.innerHTML = ''; // Clear existing machines
+            machines.forEach(machine => {
+                const machineCard = document.createElement('div');
+                machineCard.className = 'card bg-base-100 shadow-xl';
+                machineCard.innerHTML = `
+                    <div class="card-body">
+                        <h2 class="card-title">${machine.name}</h2>
+                        <p><span class="font-bold">Username:</span> ${machine.username}</p>
+                        <p><span class="font-bold">Hostname:</span> ${machine.hostname}</p>
+                        <p><span class="font-bold">Port:</span> ${machine.port}</p>
+                        <div class="card-actions justify-end">
+                            <button class="btn btn-primary play-button" data-machine-id="${machine.id}">Connect</button>
+                            <button class="btn btn-error delete-button" data-machine-id="${machine.id}">Delete</button>
+                        </div>
+                    </div>
+                `;
+                machineList.appendChild(machineCard);
+            });
+            // Attach event listeners to buttons
+            document.querySelectorAll('.play-button').forEach(button => {
+                button.addEventListener('click', handlePlayButtonClick);
+            });
+            document.querySelectorAll('.delete-button').forEach(button => {
+                button.addEventListener('click', handleDeleteButtonClick);
+            });
+        }
+
+        function handlePlayButtonClick(event) {
+            currentMachineId = event.target.getAttribute('data-machine-id');
+            document.getElementById('password_modal').showModal();
+        }
+
+        function handleDeleteButtonClick(event) {
+            const machineId = event.target.getAttribute('data-machine-id');
+            if (confirm('Are you sure you want to delete this machine?')) {
+                deleteMachine(machineId);
+            }
+        }
+
+        function deleteMachine(machineId) {
+            fetch(`http://localhost:8080/api/v1/machine/${machineId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'OK') {
+                    fetchMachines(); // Refresh the machine list
+                } else {
+                    console.error('Failed to delete machine:', data.message);
+                }
+            })
+            .catch(error => console.error('Error deleting machine:', error));
+        }
+
+        function addNewMachine() {
+            const newMachine = {
+                name: document.getElementById('new_machine_name').value,
+                username: document.getElementById('new_machine_username').value,
+                hostname: document.getElementById('new_machine_hostname').value,
+                port: document.getElementById('new_machine_port').value,
+                private_key: document.getElementById('new_machine_private_key').value,
+                passphrase: document.getElementById('new_machine_passphrase').value,
+                password: document.getElementById('new_machine_password').value,
+                organization: document.getElementById('new_machine_organization').value
+            };
+
+            fetch('http://localhost:8080/api/v1/machine', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newMachine)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'OK') {
+                    fetchMachines(); // Refresh the machine list
+                    document.getElementById('add_machine_modal').close();
+                } else {
+                    console.error('Failed to add machine:', data.message);
+                }
+            })
+            .catch(error => console.error('Error adding machine:', error));
+        }
+
+        document.getElementById('connect_button').addEventListener('click', function() {
+            const password = document.getElementById('machine_password').value;
+            if (!password) {
+                alert("Password is required to connect to the machine.");
+                return;
+            }
+
+            const connectUrl = `http://localhost:8080/api/v1/machine/${currentMachineId}/connect`;
+            fetch(connectUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ password: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'OK') {
+                    const uuid = data.data;
+                    const terminalUrl = `http://localhost:8080/static/terminal.html?uuid=${uuid}`;
+                    window.open(terminalUrl, '_blank', 'width=800,height=600');
+                } else {
+                    console.error('Failed to connect to machine:', data.message);
+                }
+            })
+            .catch(error => console.error('Error connecting to machine:', error));
+
+            document.getElementById('password_modal').close();
+            document.getElementById('machine_password').value = '';
+        });
+    </script>
+</body>
+</html>
