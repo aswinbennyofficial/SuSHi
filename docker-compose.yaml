@@ -23,7 +23,7 @@ services:
     
 
   sushi-backend:
-    image: breeze5690/sushi-backend:v1
+    image: breeze5690/sushi-backend-prod:v1
     ports:
       - "8080:8080"
     environment:

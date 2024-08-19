@@ -24,9 +24,16 @@ RUN mkdir /sushi-backend
 # Create a directory for the log file
 RUN mkdir /sushi-backend/logs
 
+# Create a directory for the database
+RUN mkdir /sushi-backend/db
+COPY ./db /sushi-backend/db
+
+COPY ./static /sushi-backend/static
+
+COPY ./config /sushi-backend/config
+
 # Copy the built binary from the build stage
 COPY --from=builder /sushi-backend/app /sushi-backend/app
-
 
 # Make the binary executable
 RUN chmod +x /sushi-backend/app
