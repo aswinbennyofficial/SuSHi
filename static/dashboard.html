@@ -121,10 +121,10 @@
                 if (data.status === 'OK') {
                     displayMachines(data.data);
                 } else {
-                    console.error('Failed to fetch machines:', data.message);
+                    showAlert('Failed to fetch machines: ' + data.message);
                 }
             })
-            .catch(error => console.error('Error fetching machines:', error));
+            .catch(error => showAlert('Error fetching machines: ' + error.message));
         }
 
         fetchMachines();
@@ -181,11 +181,12 @@
             .then(data => {
                 if (data.status === 'OK') {
                     fetchMachines(); // Refresh the machine list
+                    showAlert('Machine deleted successfully', 'success');
                 } else {
-                    console.error('Failed to delete machine:', data.message);
+                    showAlert('Failed to delete machine: ' + data.message);
                 }
             })
-            .catch(error => console.error('Error deleting machine:', error));
+            .catch(error => showAlert('Error deleting machine: ' + error.message));
         }
 
         function addNewMachine() {
@@ -211,6 +212,7 @@
                 organization: document.getElementById('new_machine_organization').value
             };
 
+            showLoading('Adding new machine...');
             fetch('/api/v1/machine', {
                 method: 'POST',
                 headers: {
@@ -221,23 +223,29 @@
             })
             .then(response => response.json())
             .then(data => {
+                hideLoading();
                 if (data.status === 'OK') {
                     fetchMachines(); // Refresh the machine list
                     document.getElementById('add_machine_modal').close();
+                    showAlert('Machine added successfully', 'success');
                 } else {
-                    console.error('Failed to add machine:', data.message);
+                    showAlert('Failed to add machine: ' + data.message);
                 }
             })
-            .catch(error => console.error('Error adding machine:', error));
+            .catch(error => {
+                hideLoading();
+                showAlert('Error adding machine: ' + error.message);
+            });
         }
 
         document.getElementById('connect_button').addEventListener('click', function() {
             const password = document.getElementById('machine_password').value;
             if (!password) {
-                alert("Password is required to connect to the machine.");
+                showAlert("Password is required to connect to the machine.");
                 return;
             }
 
+            showLoading('Connecting to machine...');
             const connectUrl = `/api/v1/machine/${currentMachineId}/connect`;
             fetch(connectUrl, {
                 method: 'POST',
@@ -249,15 +257,20 @@
             })
             .then(response => response.json())
             .then(data => {
+                hideLoading();
                 if (data.status === 'OK') {
                     const uuid = data.data;
                     const terminalUrl = `/terminal.html?uuid=${uuid}`;
                     window.open(terminalUrl, '_blank', 'width=800,height=600');
+                    showAlert('Connected successfully', 'success');
                 } else {
-                    console.error('Failed to connect to machine:', data.message);
+                    showAlert('Failed to connect to machine: ' + data.message);
                 }
             })
-            .catch(error => console.error('Error connecting to machine:', error));
+            .catch(error => {
+                hideLoading();
+                showAlert('Error connecting to machine: ' + error.message);
+            });
 
             document.getElementById('password_modal').close();
             document.getElementById('machine_password').value = '';
@@ -275,6 +288,53 @@
             document.getElementById('new_machine_password').value = '';
             document.getElementById('new_machine_organization').value = '';
         });
+
+        function showAlert(message, type = 'error') {
+            const alertContainer = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} shadow-lg mb-4`;
+            alert.innerHTML = `
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>${message}</span>
+                </div>
+            `;
+            alertContainer.appendChild(alert);
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        function showLoading(message) {
+            const alertContainer = document.getElementById('alert-container');
+            const loadingAlert = document.createElement('div');
+            loadingAlert.id = 'loading-alert';
+            loadingAlert.className = 'alert shadow-lg mb-4';
+            loadingAlert.innerHTML = `
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-info flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>${message}</span>
+                </div>
+                <div class="flex-none">
+                    <button class="btn btn-sm btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+            alertContainer.appendChild(loadingAlert);
+        }
+
+        function hideLoading() {
+            const loadingAlert = document.getElementById('loading-alert');
+            if (loadingAlert) {
+                loadingAlert.remove();
+            }
+        }
     </script>
+
+
+<div id="alert-container" class="fixed bottom-4 right-4 z-50"></div>
 </body>
 </html>
