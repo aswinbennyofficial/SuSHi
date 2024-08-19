@@ -92,7 +92,7 @@
             term.open(container);
 
             const host = window.location.host;
-            const wsURL = `ws://${host}/ssh?uuid=${uuid}`;
+            const wsURL = `wss://${host}/ssh?uuid=${uuid}`;
             const ws = new WebSocket(wsURL);
 
             ws.onopen = () => {
