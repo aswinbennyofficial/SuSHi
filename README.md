@@ -16,3 +16,15 @@ SuSHI is a web-based platform that helps to make SSH connections to remote machi
 ![screenhot 3](./static/images/connected-terminals.png)
 ![screenhot 5](./static/images/add-machine.png)
 ![screenhot 4](./static/images/enter-password.png)
+
+
+## Running app
+- `mkdir db`
+- `mkdir db/data`
+- `sudo chown -R 1001:1001 ./db/data`
+- Have the docker-compose.yaml file with all the env values
+- `docker compose up`
+- By default the server will be up on `localhost:8080`
+
+
+- It you have issues `connection closed` while opening terminal change the `wss://` to `ws://` in the `static/terminal.html` (line no. 95)
