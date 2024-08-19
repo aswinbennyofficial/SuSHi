@@ -17,4 +17,8 @@ func loadoAuthRoutes(r chi.Router, config models.Config){
 	r.Get("/callback",func(w http.ResponseWriter, r *http.Request) {
 		controllers.HandleCallback(config,w,r)
 	})
+
+	r.Get("/logout",func(w http.ResponseWriter, r *http.Request) {
+		controllers.HandleLogout(config,w,r)
+	})
 }

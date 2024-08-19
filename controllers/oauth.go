@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	database "github.com/aswinbennyofficial/SuSHi/db"
 	"github.com/aswinbennyofficial/SuSHi/models"
@@ -126,5 +127,25 @@ func HandleCallback(config models.Config,w http.ResponseWriter, r *http.Request)
 
 	// Redirect the user to the dashboard
 	http.Redirect(w, r, "/dashboard.html", http.StatusSeeOther)
+
+}
+
+func HandleLogout(config models.Config,w http.ResponseWriter, r *http.Request){
+
+	// set expiry time to 10 seconds ago
+	exp := time.Now().Add(-10 * time.Second)
+
+	// Set the JWT token as a cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		HttpOnly: false, //@TODO: Change to true
+		SameSite: http.SameSiteStrictMode,
+		Secure:   false,
+		Expires: exp,
+		Path: "/",
+	})
+
+	utils.ResponseHelper(w, http.StatusOK, "Logged out successfully", nil)
 
 }

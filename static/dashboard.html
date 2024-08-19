@@ -40,7 +40,8 @@
             <span class="ubuntu-bold poppins-medium medium-text">SuSHi</span>
         </div>
         <div class="navbar-end">
-            <button class="btn btn-primary" onclick="document.getElementById('add_machine_modal').showModal()">Add machine</button>
+            <button class="btn btn-primary mr-2" onclick="document.getElementById('add_machine_modal').showModal()">Add machine</button>
+            <button class="btn btn-secondary" onclick="logout()">Logout</button>
         </div>
     </nav>
 
@@ -365,6 +366,22 @@
 
         // Run the check when the document is fully loaded
         document.addEventListener('DOMContentLoaded', checkJwtCookie);
+
+       // Function to handle logout
+        function logout() {
+            fetch('/api/v1/auth/logout', { 
+                method: 'GET',
+                credentials: 'include' 
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/'; // Redirect to home page after logout
+                } else {
+                    console.error('Logout failed');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
 
     </script>
 
