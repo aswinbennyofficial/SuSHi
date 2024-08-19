@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: sushi
     volumes:
-      - ./db/data:/var/lib/postgresql/data
+      - ./db/data:/bitnami/postgresql/data
     restart: always
    
   # redis:
