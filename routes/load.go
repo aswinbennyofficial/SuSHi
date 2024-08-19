@@ -5,10 +5,13 @@ import (
 	"os"
 	"strings"
 
+	"path/filepath"
+
+	
 	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/go-chi/chi/v5"
+	
 	"github.com/go-chi/jwtauth/v5"
-	"path/filepath"
 )
 
 func Load(config models.Config) {
@@ -22,10 +25,12 @@ func Load(config models.Config) {
 		loadoAuthRoutes(r,config)
 	})
 
+	
 	// JWT authentication middleware
 	tokenAuth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
 
 	r.Group(func(r chi.Router) {
+		
 		r.Use(jwtauth.Verifier(tokenAuth))
         r.Use(jwtauth.Authenticator(tokenAuth))
 
@@ -53,7 +58,7 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	}
 
 	if path != "/" && path[len(path)-1] != '/' {
-		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		r.Get(path, http.RedirectHandler(path+"/", http.StatusMovedPermanently).ServeHTTP)
 		path += "/"
 	}
 	path += "*"

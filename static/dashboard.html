@@ -103,7 +103,7 @@
 </dialog>
 
     <script>
-        const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IjZiMzM4MTU4LTMyY2EtNGI1My1hMjczLWY1NGUzMjQ0Njk3ZSJ9.txNk1ZMTa8Xv8sCk1ebL6KLuCIanaHkVhN_AExdQQCs'; // Replace with your actual JWT
+        
         
         const apiUrl = '/api/v1/machines';
         let currentMachineId = null;
@@ -112,9 +112,10 @@
         function fetchMachines() {
             fetch(apiUrl, {
                 method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${jwt}`
-                }
+                credentials: 'include'
+                // headers: {
+                //     'Authorization': `Bearer ${jwt}`
+                // }
             })
             .then(response => response.json())
             .then(data => {
@@ -173,9 +174,10 @@
         function deleteMachine(machineId) {
             fetch(`/api/v1/machine/${machineId}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${jwt}`
-                }
+                credentials: 'include'
+                // headers: {
+                //     'Authorization': `Bearer ${jwt}`
+                // }
             })
             .then(response => response.json())
             .then(data => {
@@ -215,8 +217,9 @@
             showLoading('Adding new machine...');
             fetch('/api/v1/machine', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${jwt}`,
+                    // 'Authorization': `Bearer ${jwt}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(newMachine)
@@ -249,8 +252,9 @@
             const connectUrl = `/api/v1/machine/${currentMachineId}/connect`;
             fetch(connectUrl, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${jwt}`,
+                    // 'Authorization': `Bearer ${jwt}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ password: password })

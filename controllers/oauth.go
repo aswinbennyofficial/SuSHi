@@ -117,10 +117,11 @@ func HandleCallback(config models.Config,w http.ResponseWriter, r *http.Request)
 	http.SetCookie(w, &http.Cookie{
 		Name:     "jwt",
 		Value:    token,
-		HttpOnly: true,
+		HttpOnly: false,
 		SameSite: http.SameSiteStrictMode,
-		Secure:   true,
+		Secure:   false,
 		Expires: exp,
+		Path: "/",
 	})
 
 	// Redirect the user to the dashboard
