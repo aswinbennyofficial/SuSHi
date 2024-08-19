@@ -117,7 +117,7 @@ func HandleCallback(config models.Config,w http.ResponseWriter, r *http.Request)
 	http.SetCookie(w, &http.Cookie{
 		Name:     "jwt",
 		Value:    token,
-		HttpOnly: false,
+		HttpOnly: false, //@TODO: Change to true
 		SameSite: http.SameSiteStrictMode,
 		Secure:   false,
 		Expires: exp,

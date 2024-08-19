@@ -28,7 +28,7 @@
         }
 
         .medium-text {
-            font-size: 2rem; /* Adjust the size as needed */
+            font-size: 2rem;
             line-height: 1.2;
         }
     </style>
@@ -40,7 +40,7 @@
             <span class="ubuntu-bold poppins-medium medium-text">SuSHi</span>
         </div>
         <div class="navbar-end">
-            <a href="#" class="btn btn-primary">Login / Sign Up</a>
+            <button class="btn btn-primary" onclick="document.getElementById('authModal').showModal()">Login / Sign Up</button>
         </div>
     </nav>
 
@@ -59,9 +59,22 @@
         </div>
     </div>
 
+    <!-- Login/Sign Up Modal -->
+    <dialog id="authModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">Login / Sign Up</h3>
+            <div class="modal-action">
+                <button id="googleAuth" class="btn btn-outline">Login with Google</button>
+                <button id="githubAuth" class="btn btn-outline">Login with GitHub</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>Close</button>
+        </form>
+    </dialog>
 
-     <!-- Content Section -->
-     <div class="container mx-auto px-4 py-8">
+    <!-- Content Section -->
+    <div class="container mx-auto px-4 py-8">
         <p class="text-lg mb-8">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.
         </p>
@@ -102,7 +115,7 @@
         </p>
     </div>
 
-    <!-- footer -->
+    <!-- Footer -->
     <footer class="footer bg-neutral text-neutral-content p-10">
         <nav>
           <h6 class="footer-title">Services</h6>
@@ -124,7 +137,37 @@
           <a class="link link-hover">Privacy policy</a>
           <a class="link link-hover">Cookie policy</a>
         </nav>
-      </footer>
-    
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const jwt = document.cookie.split('; ').find(row => row.startsWith('jwt='));
+            if (jwt) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        // Event listeners for the buttons
+        document.getElementById('googleAuth').addEventListener('click', function() {
+            authenticate('google');
+        });
+
+        document.getElementById('githubAuth').addEventListener('click', function() {
+            authenticate('github');
+        });
+
+        function authenticate(provider) {
+            fetch(`/api/v1/auth/url?to=${provider}`)
+                .then(response => response.text()) // Use .text() instead of .json()
+                .then(url => {
+                    if (url) {
+                        window.location.href = url; // Redirect to the URL received in the response
+                    } else {
+                        console.error('Failed to get authentication URL');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
 </body>
 </html>
