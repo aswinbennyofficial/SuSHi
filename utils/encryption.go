@@ -6,10 +6,12 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
+
 	// "errors"
 
-	"golang.org/x/crypto/pbkdf2"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 func EncryptString(text, password, salt string) (string,string,error) {
@@ -85,4 +87,12 @@ func DecryptString(encodedCiphertext, encodedIV, password, salt string) (string,
 
     return string(plaintext), nil
 
+}
+
+func GenerateUUID(len int) (string,error) {
+    bytes := make([]byte, len/2)
+    if _, err := rand.Read(bytes); err != nil {
+        return "", err
+    }
+    return hex.EncodeToString(bytes)[:len], nil
 }

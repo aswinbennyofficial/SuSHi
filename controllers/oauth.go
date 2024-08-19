@@ -3,8 +3,11 @@ package controllers
 import (
 	"net/http"
 
+	database "github.com/aswinbennyofficial/SuSHi/db"
 	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/aswinbennyofficial/SuSHi/oauth"
+	"github.com/aswinbennyofficial/SuSHi/utils"
+	"github.com/rs/zerolog/log"
 )
 
 func GetAuthURL(config models.Config,w http.ResponseWriter, r *http.Request){
@@ -48,23 +51,79 @@ func HandleCallback(config models.Config,w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	var email string
+	var name string
+	var err error
+
 	switch state {
 	case config.OAuthConfig.Google.State:
-		email, name, err := oauth.HandleGoogleCallback(config, code)
+		email, name, err = oauth.HandleGoogleCallback(config, code)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Write([]byte("Email: " + email + "\nName: " + name))
+		doesUserExists:=database.DoesUserExists(config,email)
+		if !doesUserExists{
+			log.Debug().Msgf("User %s does not exist",email)
+			err=database.SaveUser(config,email,name)
+			if err != nil {
+				log.Error().Msgf("Error saving user to database: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+		}
 	case config.OAuthConfig.GitHub.State:
-		email, name, err := oauth.HandleGitHubCallback(config, code)
+		email, name, err = oauth.HandleGitHubCallback(config, code)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.Write([]byte("Email: " + email + "\nName: " + name))
+		doesUserExists:=database.DoesUserExists(config,email)
+		if !doesUserExists{
+			log.Debug().Msgf("User %s does not exist",email)
+			err=database.SaveUser(config,email,name)
+			if err != nil {
+				log.Error().Msgf("Error saving user to database: %v", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+		}
 	default:
 		http.Error(w, "Invalid query param 'state'", http.StatusBadRequest)
 		return
 	}
+
+	log.Debug().Msgf("Email: %s", email)
+	// Fetch username from the database
+	username, err := database.GetUsername(config, email)
+	if err != nil {
+		http.Error(w, "Error fetching username from database", http.StatusInternalServerError)
+		return
+	} 
+	log.Debug().Msgf("Username: %s", username)
+
+	// Generate a JWT token
+	token, exp, err := utils.GenerateJWT(config.JWTSecret, username)
+	if err != nil {
+		log.Error().Msgf("Error generating JWT token: %v", err)
+		http.Error(w, "Error generating JWT token", http.StatusInternalServerError)
+		return
+	}
+	log.Debug().Msgf("JWT token: %s", token)
+
+	// Set the JWT token as a cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   true,
+		Expires: exp,
+	})
+
+	// Redirect the user to the dashboard
+	http.Redirect(w, r, "/dashboard.html", http.StatusSeeOther)
+
 }
