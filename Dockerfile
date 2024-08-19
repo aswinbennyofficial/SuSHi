@@ -28,7 +28,8 @@ RUN mkdir /sushi-backend/logs
 COPY --from=builder /sushi-backend/app /sushi-backend/app
 
 
-
+# Make the binary executable
+RUN chmod +x /sushi-backend/app
 
 # Set the working directory
 WORKDIR /sushi-backend

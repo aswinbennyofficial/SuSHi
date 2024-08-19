@@ -1,6 +1,6 @@
 ## SuSHI (Work in Progress)
 
-SuSHI is a web-based tool that allows users to securely connect to remote machines via SSH, providing a terminal interface in the browser
+SuSHI is a web-based platform that helps to make SSH connections to remote machines from any location, with a browser based terminal. 
 
 ### Features
 - Secure SSH Connections: Connect to remote machines securely using SSH.
@@ -11,4 +11,8 @@ SuSHI is a web-based tool that allows users to securely connect to remote machin
 
 
 ### Screenshot
-![screenhot 1](./static/images/image.png)
+![screenhot 1](./static/images/homepage.png)
+![screenhot 2](./static/images/dashboard.png)
+![screenhot 3](./static/images/connected-terminals.png)
+![screenhot 5](./static/images/add-machine.png)
+![screenhot 4](./static/images/enter-password.png)

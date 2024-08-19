@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>SuSHi | Homepage</title>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,16 +45,16 @@
     </nav>
 
     <!-- Hero Section -->
-    <div class="hero min-h-screen bg-cover bg-center" style="background-image: url('https://img.daisyui.com/images/stock/photo-1507358522600-9f71e620c44e.webp');">
+    <div class="hero min-h-screen bg-cover bg-center" style="background-image: url('./images/terminal.png');">
         <div class="hero-overlay bg-opacity-60"></div>
         <div class="hero-content text-neutral-content text-center flex flex-col justify-center items-center h-full p-6">
             <div class="max-w-md">
                 <h1 class="text-5xl font-bold mb-5">Hello there</h1>
                 <p class="mb-5 text-lg">
-                    Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem
-                    quasi. In deleniti eaque aut repudiandae et a id nisi.
+                    Welcome to SuSHi, web-based platform that helps to make SSH connections to remote machines from any location, with a browser based terminal. 
                 </p>
-                <a href="#" class="btn btn-primary">Get Started</a>
+                
+                <button class="btn btn-primary" onclick="document.getElementById('authModal').showModal()">Get started</button>
             </div>
         </div>
     </div>
@@ -76,7 +76,7 @@
     <!-- Content Section -->
     <div class="container mx-auto px-4 py-8">
         <p class="text-lg mb-8">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.
+            The private keys are encrypted in the database using PBKDF2 derived keys derived from the machine-specific password provided by the user and an owner-specific salt.
         </p>
     </div>
 
@@ -85,23 +85,30 @@
         <h2 class="text-3xl font-bold mb-4">Screenshots</h2>
         <div class="carousel w-full">
             <div id="slide1" class="carousel-item relative w-full">
-                <img src="https://picsum.photos/800/400?random=1" class="w-full" />
+                <img src="./images/dashboard.png" class="w-full" />
                 <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                    <a href="#slide3" class="btn btn-circle">❮</a> 
+                    <a href="#slide4" class="btn btn-circle">❮</a> 
                     <a href="#slide2" class="btn btn-circle">❯</a>
                 </div>
             </div> 
             <div id="slide2" class="carousel-item relative w-full">
-                <img src="https://picsum.photos/800/400?random=2" class="w-full" />
+                <img src="./images/connected-terminals.png" class="w-full" />
                 <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
                     <a href="#slide1" class="btn btn-circle">❮</a> 
                     <a href="#slide3" class="btn btn-circle">❯</a>
                 </div>
             </div> 
             <div id="slide3" class="carousel-item relative w-full">
-                <img src="https://picsum.photos/800/400?random=3" class="w-full" />
+                <img src="./images/add-machine.png" class="w-full" />
                 <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
                     <a href="#slide2" class="btn btn-circle">❮</a> 
+                    <a href="#slide4" class="btn btn-circle">❯</a>
+                </div>
+            </div>
+            <div id="slide4" class="carousel-item relative w-full">
+                <img src="./images/enter-password.png" class="w-full" />
+                <div class="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+                    <a href="#slide3" class="btn btn-circle">❮</a> 
                     <a href="#slide1" class="btn btn-circle">❯</a>
                 </div>
             </div>

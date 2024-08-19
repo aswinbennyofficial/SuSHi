@@ -29,13 +29,22 @@ services:
     environment:
       - SERVER_PORT=8080
       - LOG_LEVEL=Debug
-      - JWT_SECRET=
+      - JWT_SECRET=secret123
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=
-      - DB_PASSWORD=
-      - DB_NAME=
-      - MIGRATE_DB=true 
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=sushi
+      - MIGRATE_DB=true
+
+      # OAuth Configuration
+      - GOOGLE_CLIENT_ID=
+      - GOOGLE_CLIENT_SECRET=
+      - GOOGLE_REDIRECT_URL=http://localhost:8080/api/v1/auth/callback
+
+      - GITHUB_CLIENT_ID=
+      - GITHUB_CLIENT_SECRET=
+      - GITHUB_REDIRECT_URL=http://localhost:8080/api/v1/auth/callback 
     # volumes:
     #   - ./static:/app/static
     depends_on:
