@@ -106,7 +106,7 @@ func allocatePseudoTerminal(session *ssh.Session)(error){
 	}
 
 	// Request a pseudo terminal
-	err := session.RequestPty("xterm", 80, 40, modes)
+	err := session.RequestPty("xterm", 600, 800, modes)
 	if err != nil {
 		return err
 	}
