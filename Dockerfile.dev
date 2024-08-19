@@ -21,6 +21,8 @@ COPY ./app /sushi-backend/app
 
 COPY ./static /sushi-backend/static
 
+COPY ./config /sushi-backend/config
+
 
 
 

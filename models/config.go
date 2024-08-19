@@ -18,6 +18,7 @@ type Config struct {
 	DB                 *pgxpool.Pool
 	Router			   *chi.Mux
 	DoMigrations	   bool
+	OAuthConfig 		OAuthConfig
 
 }
 
@@ -38,3 +39,17 @@ type DatabaseConfig struct {
 }
 
 
+
+
+type ProviderConfig struct {
+    ClientID     string   `yaml:"client_id"`
+    ClientSecret string   `yaml:"client_secret"`
+    Scopes       []string `yaml:"scopes"`
+    RedirectURL  string   `yaml:"redirect_url"`
+    State        string   `yaml:"state"`
+}
+
+type OAuthConfig struct {
+    Google ProviderConfig `yaml:"google"`
+    GitHub ProviderConfig `yaml:"github"`
+}

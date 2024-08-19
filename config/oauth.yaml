@@ -1,0 +1,18 @@
+oauth:
+  google:
+    client_id: "${GOOGLE_CLIENT_ID}"
+    client_secret: "${GOOGLE_CLIENT_SECRET}"
+    scopes: 
+      - https://www.googleapis.com/auth/userinfo.email
+      - https://www.googleapis.com/auth/userinfo.profile
+    redirect_url: "${GOOGLE_REDIRECT_URL}"
+    state: google
+
+  github:
+    client_id: "${GITHUB_CLIENT_ID}"
+    client_secret: "${GITHUB_CLIENT_SECRET}"
+    scopes: 
+      - read:user
+      - read:email
+    redirect_url: "${GITHUB_REDIRECT_URL}"
+    state: github

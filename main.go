@@ -100,7 +100,8 @@ func showConfigLog(config models.Config){
 	log.Debug().Msgf("User: %s", config.DatabaseConfig.User)
 	log.Debug().Msgf("Password: %s", config.DatabaseConfig.Password)
 	log.Debug().Msgf("Database: %s", config.DatabaseConfig.Database)
-
+	log.Debug().Msgf("Google : cid %s | csecret %s | scope %s | redirecturl %s | state %s", config.OAuthConfig.Google.ClientID,config.OAuthConfig.Google.ClientSecret,config.OAuthConfig.Google.Scopes,config.OAuthConfig.Google.RedirectURL,config.OAuthConfig.Google.State)
+	log.Debug().Msgf("Github client id : %s", config.OAuthConfig.GitHub.ClientID)
 
 }
 

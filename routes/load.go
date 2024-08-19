@@ -18,6 +18,10 @@ func Load(config models.Config) {
 	filesDir := http.Dir(filepath.Join(workDir, "static"))
 	FileServer(r, "/", filesDir)
 
+	r.Route("/api/v1/auth", func(r chi.Router){
+		loadoAuthRoutes(r,config)
+	})
+
 	// JWT authentication middleware
 	tokenAuth := jwtauth.New("HS256", []byte(config.JWTSecret), nil)
 
