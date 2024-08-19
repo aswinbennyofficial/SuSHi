@@ -336,6 +336,27 @@
                 loadingAlert.remove();
             }
         }
+
+        function checkJwtCookie() {
+            // Function to get a specific cookie by name
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            // Check for the jwt cookie
+            const jwt = getCookie('jwt');
+
+            if (!jwt) {
+                // Redirect to the homepage if jwt cookie is not present
+                window.location.href = '/';
+            }
+        }
+
+        // Run the check when the document is fully loaded
+        document.addEventListener('DOMContentLoaded', checkJwtCookie);
+
     </script>
 
 
