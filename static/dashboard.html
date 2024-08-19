@@ -72,25 +72,25 @@
         <h3 class="font-bold text-lg">Add New Machine</h3>
         <div class="form-control w-full">
             <label class="label"><span class="label-text">Name</span></label>
-            <input type="text" id="new_machine_name" class="input input-bordered w-full">
+            <input type="text" id="new_machine_name" class="input input-bordered w-full" placeholder="machine 1">
             
             <label class="label"><span class="label-text">Username</span></label>
-            <input type="text" id="new_machine_username" class="input input-bordered w-full">
+            <input type="text" id="new_machine_username" class="input input-bordered w-full" placeholder="johndoe">
             
             <label class="label"><span class="label-text">Hostname</span></label>
-            <input type="text" id="new_machine_hostname" class="input input-bordered w-full">
+            <input type="text" id="new_machine_hostname" class="input input-bordered w-full" placeholder="johnsSSHmachine.com">
             
             <label class="label"><span class="label-text">Port</span></label>
-            <input type="text" id="new_machine_port" class="input input-bordered w-full">
+            <input type="text" id="new_machine_port" class="input input-bordered w-full" placeholder="22">
             
             <label class="label"><span class="label-text">Private Key</span></label>
-            <textarea id="new_machine_private_key" class="textarea textarea-bordered w-full" rows="3"></textarea>
+            <textarea id="new_machine_private_key" class="textarea textarea-bordered w-full" rows="3" placeholder="-----BEGIN RSA PRIVATE KEY----- MIIEowIBAAKCAQEAgt1D.... ----END RSA PRIVATE KEY-----"></textarea>
             
             <label class="label"><span class="label-text">Passphrase</span></label>
             <input type="password" id="new_machine_passphrase" class="input input-bordered w-full">
             
             <label class="label"><span class="label-text">Password</span></label>
-            <input type="password" id="new_machine_password" class="input input-bordered w-full">
+            <input type="password" id="new_machine_password" class="input input-bordered w-full" placeholder="jhfdgkjg@123">
             
             <label class="label"><span class="label-text">Organization</span></label>
             <input type="text" id="new_machine_organization" class="input input-bordered w-full">
@@ -120,12 +120,21 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'OK') {
-                    displayMachines(data.data);
+                    if (data.data !== null) {
+                        displayMachines(data.data);
+                    }
+                    else{
+                        showAlert('No machines found. Add a new machine to get started.', 'info');
+                    }
                 } else {
                     showAlert('Failed to fetch machines: ' + data.message);
                 }
             })
-            .catch(error => showAlert('Error fetching machines: ' + error.message));
+            .catch(error => {
+                
+                showAlert('Error fetching machines: ' + error.message);
+                
+            });
         }
 
         fetchMachines();
