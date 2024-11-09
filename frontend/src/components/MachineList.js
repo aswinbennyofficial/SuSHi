@@ -1,6 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { PlusCircle, LogOut } from 'lucide-react';
 
 const MachineList = ({ machines, onConnect }) => {
     return (

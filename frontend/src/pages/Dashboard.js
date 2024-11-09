@@ -23,20 +23,18 @@ const Dashboard = () => {
   const fetchMachines = async () => {
     try {
       const response = await axios.get('/api/v1/machines');
-      console.log(response.data);
-      if (response.status==200 && response.data.data === null) {
+      if (response.status === 200 && response.data.data === null) {
         addAlert('No machines found', 'info');
-      }else if(response.status==200){
-        setMachines(response.data);
+      } else if (response.status === 200) {
+        setMachines(response.data.data);
+      } else {
+        addAlert('Failed to fetch machines', 'error');
       }
-      
     } catch (error) {
       addAlert('Failed to fetch machines', 'error');
     }
   };
 
-
-  
   const handleLogout = () => {
     navigate('/');
   };
@@ -55,6 +53,7 @@ const Dashboard = () => {
       await axios.post('/api/v1/machine', machineData);
       addAlert('Machine added successfully', 'success');
       fetchMachines();
+      setShowAddMachineModal(false); // Close modal after successful addition
     } catch (error) {
       addAlert('Failed to add machine', 'error');
     }
@@ -68,6 +67,9 @@ const Dashboard = () => {
 
     setIsLoading(true);
     try {
+      console.log("Machine id : ",currentMachineId);
+      console.log("Connecting with password:", password);
+
       const response = await axios.post(`/api/v1/machine/${currentMachineId}/connect`, {
         password: password
       }, {
@@ -79,8 +81,6 @@ const Dashboard = () => {
 
       if (response.data.status === 'OK') {
         const uuid = response.data.data;
-        console.log(response.data);
-        // Instead of window.open, use navigate to the new terminal route
         window.open(`/terminal/${uuid}`, '_blank', 'width=800,height=600');
         addAlert('Connected successfully', 'success');
         setShowPasswordModal(false);
@@ -95,7 +95,12 @@ const Dashboard = () => {
   };
 
   const addAlert = (message, type) => {
-    setAlerts(prev => [...prev, { message, type }]);
+    const newAlert = { message, type, id: Date.now() };
+    setAlerts(prev => [...prev, newAlert]);
+    // Remove alert after 5 seconds
+    setTimeout(() => {
+      setAlerts(prev => prev.filter(alert => alert.id !== newAlert.id));
+    }, 5000);
   };
 
   return (
@@ -104,6 +109,7 @@ const Dashboard = () => {
       <div className="container mx-auto p-4 flex-1">
         <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
         <MachineList machines={machines} onConnect={handlePasswordModal} />
+        
         {showPasswordModal && (
           <PasswordModal
             onClose={() => setShowPasswordModal(false)}
@@ -111,16 +117,24 @@ const Dashboard = () => {
             isLoading={isLoading}
           />
         )}
+        
         {showAddMachineModal && (
-          <AddMachineModal
-            onClose={handleAddMachineModal}
-            onAddMachine={addMachine}
-            onAlert={addAlert}
-          />
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <AddMachineModal
+              onClose={() => setShowAddMachineModal(false)}
+              onAddMachine={addMachine}
+              onAlert={addAlert}
+            />
+          </div>
         )}
-        <div id="alert-container" className="fixed bottom-4 right-4 z-50">
-          {alerts.map((alert, index) => (
-            <Alert key={index} message={alert.message} type={alert.type} />
+
+        <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+          {alerts.map((alert) => (
+            <Alert 
+              key={alert.id} 
+              message={alert.message} 
+              type={alert.type} 
+            />
           ))}
         </div>
       </div>

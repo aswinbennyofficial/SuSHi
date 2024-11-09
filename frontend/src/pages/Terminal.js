@@ -1,174 +1,130 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import { Terminal as XTerm } from 'xterm';
-import { FitAddon } from 'xterm-addon-fit';
-import { WebLinksAddon } from 'xterm-addon-web-links';
-import { AttachAddon } from 'xterm-addon-attach';
+import React, { useEffect, useRef, useState } from 'react';
+import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
+import { useParams } from 'react-router-dom';
 
-const Terminal = () => {
-  const { uuid } = useParams();
+const TerminalComponent = () => {
+  const [terminals, setTerminals] = useState({});
+  const [wsConnections, setWsConnections] = useState({});
   const [activeTab, setActiveTab] = useState(0);
-  const [terminals, setTerminals] = useState([]);
-  const terminalRef = useRef(null);
-  const wsRef = useRef(null);
-  const xtermRef = useRef(null);
+  const [tabCount, setTabCount] = useState(1);
+  const terminalRefs = useRef({});
+  const { uuid } = useParams();
 
-  // Initialize terminal
-  useEffect(() => {
-    if (!terminalRef.current) return;
+  const createTerminal = (tabId) => {
+    if (terminalRefs.current[tabId]) {
+      return;
+    }
 
-    // Initialize xterm.js
-    const term = new XTerm({
-      cursorBlink: true,
-      cursorStyle: 'block',
-      fontSize: 14,
-      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-      theme: {
-        background: '#1e1e1e',
-        foreground: '#ffffff',
-      },
-      allowTransparency: true,
-      scrollback: 1000,
-      cols: 80,
-      rows: 24,
-    });
+    const term = new Terminal();
+    const container = document.getElementById(`terminal-${tabId}`);
+    if (!container) return;
 
-    // Create addons
-    const fitAddon = new FitAddon();
-    const webLinksAddon = new WebLinksAddon();
+    term.open(container);
 
-    // Load addons
-    term.loadAddon(fitAddon);
-    term.loadAddon(webLinksAddon);
+    const host = window.location.host;
+    const wsURL = `ws://${host}/api/v1/ssh?uuid=${uuid || noUUID()}`;
+    const ws = new WebSocket(wsURL);
 
-    // Open terminal in the container
-    term.open(terminalRef.current);
-    
-    // Connect to WebSocket
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/api/v1/terminal/${uuid}`);
-    
-    // Create and load attach addon after WebSocket connection
     ws.onopen = () => {
-      const attachAddon = new AttachAddon(ws);
-      term.loadAddon(attachAddon);
-      // Initial terminal fit
-      fitAddon.fit();
-      // Show connection message
-      term.write('\x1b[1;32mConnected to terminal.\x1b[0m\r\n');
+      term.write('Connected to SuSHI v0...\r\n\r\n');
+      term.prompt = '> ';
+      term.onData(data => {
+        ws.send(JSON.stringify({ type: 'data', data: data }));
+      });
+      startHeartbeat(ws);
     };
 
-    // Handle WebSocket errors
-    ws.onerror = (error) => {
-      term.write('\x1b[1;31mWebSocket connection error.\x1b[0m\r\n');
-      console.error('WebSocket error:', error);
+    ws.onmessage = event => {
+      term.write(event.data);
     };
 
-    // Handle WebSocket close
+    ws.onerror = event => {
+      term.write(`WebSocket error: ${event}\r\n`);
+    };
+
     ws.onclose = () => {
-      term.write('\x1b[1;31mDisconnected from terminal.\x1b[0m\r\n');
+      term.write('Connection closed.\r\n');
     };
 
-    // Store references
-    wsRef.current = ws;
-    xtermRef.current = term;
-
-    // Handle window resize
-    const handleResize = () => {
-      fitAddon.fit();
-      // Send new dimensions to server if needed
-      const dimensions = { cols: term.cols, rows: term.rows };
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'resize', ...dimensions }));
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    // Copy on selection
-    term.onSelectionChange(() => {
-      if (term.hasSelection()) {
-        const selection = term.getSelection();
-        navigator.clipboard.writeText(selection);
-      }
-    });
-
-    // Paste on Ctrl+V or Command+V
-    term.attachCustomKeyEventHandler((event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'v' && event.type === 'keydown') {
-        navigator.clipboard.readText().then(text => {
-          ws.send(text);
-        });
-        return false;
-      }
-      return true;
-    });
-
-    // Cleanup function
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-      if (xtermRef.current) {
-        xtermRef.current.dispose();
-      }
-    };
-  }, [uuid]);
-
-  // Handle adding new terminal tab
-  const addNewTerminal = () => {
-    const newTabIndex = terminals.length;
-    setTerminals([...terminals, { id: newTabIndex }]);
-    setActiveTab(newTabIndex);
+    terminalRefs.current[tabId] = term;
+    setTerminals(prev => ({ ...prev, [tabId]: term }));
+    setWsConnections(prev => ({ ...prev, [tabId]: ws }));
   };
 
+  const startHeartbeat = (ws) => {
+    setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'heartbeat', data: '' }));
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+  };
+
+  const noUUID = () => {
+    console.log('no uuid');
+    return '';
+  };
+
+  const addTab = () => {
+    const newTabId = tabCount;
+    setTabCount(prev => prev + 1);
+    setTimeout(() => {
+      createTerminal(newTabId);
+      setActiveTab(newTabId);
+    }, 0);
+  };
+
+  const switchTab = (tabId) => {
+    setActiveTab(tabId);
+  };
+
+  useEffect(() => {
+    createTerminal(0);
+    
+    return () => {
+      // Cleanup WebSocket connections when component unmounts
+      Object.values(wsConnections).forEach(ws => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.close();
+        }
+      });
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex items-center border-b border-gray-200 bg-gray-800">
-        <div className="flex space-x-2 p-2">
-          <button
-            className={`px-4 py-2 rounded-t-lg transition-colors duration-200 ${
-              activeTab === 0 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-            onClick={() => setActiveTab(0)}
-          >
-            Terminal 1
-          </button>
-          {terminals.map((term, index) => (
-            <button
-              key={term.id}
-              className={`px-4 py-2 rounded-t-lg transition-colors duration-200 ${
-                activeTab === index + 1
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+    <div className="bg-base-200 h-screen flex flex-col">
+      <div className="flex items-center p-2 bg-[#333] text-white">
+        <div className="flex">
+          {[...Array(tabCount)].map((_, index) => (
+            <a
+              key={index}
+              className={`tab px-3 py-1 cursor-pointer hover:bg-[#555] ${
+                activeTab === index ? 'bg-[#444]' : ''
               }`}
-              onClick={() => setActiveTab(index + 1)}
+              onClick={() => switchTab(index)}
             >
-              Terminal {index + 2}
-            </button>
+              Terminal {index + 1}
+            </a>
           ))}
         </div>
-        <button 
-          className="ml-auto p-2 text-white hover:bg-gray-700 rounded-lg mr-2 transition-colors duration-200"
-          onClick={addNewTerminal}
+        <button
+          onClick={addTab}
+          className="ml-auto px-3 py-1 bg-[#444] hover:bg-[#555]"
         >
           +
         </button>
       </div>
-      
-      <div className="flex-1 bg-[#1e1e1e]">
-        <div
-          ref={terminalRef}
-          className="h-full"
-          style={{ padding: '12px' }}
-        />
+      <div className="flex-1 relative bg-black">
+        {[...Array(tabCount)].map((_, index) => (
+          <div
+            key={index}
+            id={`terminal-${index}`}
+            className={`absolute inset-0 ${activeTab === index ? 'block' : 'hidden'}`}
+          />
+        ))}
       </div>
     </div>
   );
 };
 
-export default Terminal;
+export default TerminalComponent;
