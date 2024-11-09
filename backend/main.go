@@ -79,7 +79,7 @@ func main() {
 
 	// Start HTTP server
 	log.Info().Msgf("Starting server on port %s", config.ServerPort)
-	err = http.ListenAndServe(":8080", config.Router)
+	err = http.ListenAndServe(":"+config.ServerPort, config.Router)
 	if err != nil {
 		log.Fatal().Msgf("Failed to start server: %v", err)
 	}

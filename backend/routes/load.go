@@ -2,24 +2,51 @@ package routes
 
 import (
 	"net/http"
-	"os"
+	// "os"
 	"strings"
 
-	"path/filepath"
+	// "path/filepath"
 
 	
 	"github.com/aswinbennyofficial/SuSHi/models"
 	"github.com/go-chi/chi/v5"
 	
 	"github.com/go-chi/jwtauth/v5"
+	"github.com/go-chi/cors"
 )
 
 func Load(config models.Config) {
 	r:=config.Router
 	// Serve static files (e.g., xterm.js frontend)
-	workDir, _ := os.Getwd()
-	filesDir := http.Dir(filepath.Join(workDir, "static"))
-	FileServer(r, "/", filesDir)
+	// workDir, _ := os.Getwd()
+	// filesDir := http.Dir(filepath.Join(workDir, "static"))
+	// FileServer(r, "/", filesDir)
+
+	corsOptions := cors.Options{
+		// Allowing all origins for demonstration. You can replace "*" with specific origins for stricter policies.
+		AllowedOrigins: []string{"*"}, // You can specify your front-end origin here, e.g., "http://localhost:3000"
+		AllowedMethods: []string{
+			http.MethodGet, 
+			http.MethodPost, 
+			http.MethodPut, 
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowedHeaders: []string{
+			"Content-Type",
+			"Authorization",
+			"X-Requested-With",
+			"Accept",
+			"Origin",
+		},
+		ExposedHeaders: []string{
+			"Content-Length",
+		},
+		MaxAge: 3600,
+	}
+
+	// Apply the CORS middleware
+	r.Use(cors.Handler(corsOptions))
 
 	r.Route("/api/v1/auth", func(r chi.Router){
 		loadoAuthRoutes(r,config)

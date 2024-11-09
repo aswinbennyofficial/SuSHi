@@ -11,7 +11,7 @@ import (
 
 func loadSSHRoutes(r chi.Router, config models.Config){
 	// WebSocket handler
-    r.Get("/ssh", func(w http.ResponseWriter, r *http.Request) {
+    r.Get("/api/v1/ssh", func(w http.ResponseWriter, r *http.Request) {
         controllers.HandleSSHConnection(config, w, r)
 		
     })

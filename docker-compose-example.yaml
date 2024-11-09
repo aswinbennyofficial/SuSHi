@@ -30,11 +30,11 @@ services:
       - DB_NAME=sushi
       - MIGRATE_DB=true
       # Update callback URLs to use new domain
-      - GOOGLE_CLIENT_ID=188782029541-mp3dho0iq7tvjqmnptbha1t30i61lji0.apps.googleusercontent.com
-      - GOOGLE_CLIENT_SECRET=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
+      - GOOGLE_CLIENT_ID=
+      - GOOGLE_CLIENT_SECRET=
       - GOOGLE_REDIRECT_URL=http://localhost:8080/api/v1/auth/callback
-      - GITHUB_CLIENT_ID=Ov23lilhxa9zph0EhMjE
-      - GITHUB_CLIENT_SECRET=4398d6cf674b60cbaca1ec21a4a730e0985f4ec9
+      - GITHUB_CLIENT_ID=
+      - GITHUB_CLIENT_SECRET=
       - GITHUB_REDIRECT_URL=http://localhost:8080/api/v1/auth/callback
     depends_on:
       - postgres

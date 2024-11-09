@@ -1,0 +1,33 @@
+:8080 {
+    # Global options
+    log {
+        output stdout
+        format console
+        level DEBUG    # Added for debugging
+    }
+
+    # Handle API paths first
+    handle /api/* {
+        reverse_proxy sushi-backend:8081 {
+            header_up Host {upstream_hostport}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Handle dashboard path
+    handle /dashboard/* {
+        reverse_proxy frontend:3000
+    }
+
+    # Handle terminal path
+    handle /terminal/* {
+        reverse_proxy frontend:3000
+    }
+
+    # Handle root and all other frontend paths
+    handle /* {
+        reverse_proxy frontend:3000
+    }
+}

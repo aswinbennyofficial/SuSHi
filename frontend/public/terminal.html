@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuSHI | Terminal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        #terminal-container {
+            width: 100%;
+            height: calc(100vh - 40px); /* Adjust height for the tab bar */
+            background-color: black;
+            position: relative;
+        }
+        .tab-bar {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            background-color: #333;
+            color: white;
+        }
+        .tab-bar .tabs a {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .tab-bar .tabs a:hover {
+            background-color: #555;
+        }
+        .tab-bar .tabs a.tab-active {
+            background-color: #444;
+        }
+        .tab-bar button {
+            background-color: #444;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .tab-bar button:hover {
+            background-color: #555;
+        }
+        .terminal-instance {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .terminal-instance.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-base-200">
+    <div class="tab-bar">
+        <div class="tabs">
+            <a class="tab tab-active" data-tab="0">Terminal 1</a>
+        </div>
+        <button id="add-tab" class="ml-auto">+</button>
+    </div>
+    <div id="terminal-container">
+        <div class="terminal-instance active" id="terminal-0"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstTab = document.querySelector('.tab[data-tab="0"]');
+            firstTab.addEventListener('click', () => {
+                switchTab(0);
+            });
+            createTerminal(0);
+        });
+
+        let tabIndex = 1;
+        const terminals = {};
+        const wsConnections = {};
+        const uuid = new URLSearchParams(window.location.search).get('uuid') || noUUID();
+
+        function createTerminal(tabId) {
+            // Check if the terminal already exists
+            if (terminals[tabId]) {
+                return;
+            }
+
+            const term = new Terminal();
+            const container = document.getElementById(`terminal-${tabId}`);
+            term.open(container);
+
+            const host = window.location.host;
+            const wsURL = `wss://${host}/ssh?uuid=${uuid}`;
+            const ws = new WebSocket(wsURL);
+
+            ws.onopen = () => {
+                term.write('Connected to SuSHI v0...\r\n\r\n');
+                term.prompt = '> ';
+                term.onData(data => {
+                    ws.send(JSON.stringify({ type: 'data', data: data }));
+                });
+                startHeartbeat(ws);
+            };
+
+            ws.onmessage = event => {
+                term.write(event.data);
+            };
+
+            ws.onerror = event => {
+                term.write(`WebSocket error: ${event}\r\n`);
+            };
+
+            ws.onclose = () => {
+                term.write('Connection closed.\r\n');
+            };
+
+            terminals[tabId] = term;
+            wsConnections[tabId] = ws;
+        }
+
+        function startHeartbeat(ws) {
+            setInterval(() => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'heartbeat', data: '' }));
+                }
+            }, 5 * 60 * 1000); // 5 minutes
+        }
+
+        function noUUID() {
+            console.log('no uuid')
+        }
+
+        document.getElementById('add-tab').addEventListener('click', () => {
+            const newTabId = tabIndex++;
+            const newTab = document.createElement('a');
+            newTab.className = 'tab';
+            newTab.innerText = `Terminal ${newTabId + 1}`;
+            newTab.setAttribute('data-tab', newTabId);
+
+            const newTerminalDiv = document.createElement('div');
+            newTerminalDiv.className = 'terminal-instance';
+            newTerminalDiv.id = `terminal-${newTabId}`;
+            document.getElementById('terminal-container').appendChild(newTerminalDiv);
+
+            document.querySelector('.tabs').appendChild(newTab);
+
+            // Event listener for tab switching
+            newTab.addEventListener('click', (e) => {
+                const tabId = e.target.getAttribute('data-tab');
+                switchTab(tabId);
+            });
+
+            createTerminal(newTabId);
+            switchTab(newTabId);
+        });
+
+        function switchTab(tabId) {
+            console.log('Switching to tab:', tabId);
+            
+            // Ensure all tabs and terminals are deactivated
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('tab-active');
+            });
+            document.querySelectorAll('.terminal-instance').forEach(terminal => {
+                terminal.classList.remove('active');
+            });
+
+            // Activate the selected tab and terminal
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('tab-active');
+            document.getElementById(`terminal-${tabId}`).classList.add('active');
+        }
+
+        // Initialize the first terminal
+        createTerminal(0);
+    </script>
+</body>
+</html>

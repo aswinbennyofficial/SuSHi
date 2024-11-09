@@ -1,0 +1,24 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { PlusCircle, LogOut } from 'lucide-react';
+
+const MachineList = ({ machines, onConnect }) => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="machine-list">
+        {machines.map((machine) => (
+          <div key={machine.id} className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h2 className="card-title">{machine.name}</h2>
+              <div className="card-actions justify-end">
+                <button className="btn btn-primary" onClick={() => onConnect(machine.id)}>
+                  Connect
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+export default MachineList;
