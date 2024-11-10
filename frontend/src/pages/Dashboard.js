@@ -94,6 +94,21 @@ const Dashboard = () => {
     }
   };
 
+  const deleteMachine = async (machineId) => {
+    try {
+      const response = await axios.delete(`/api/v1/machine/${machineId}`);
+      if (response.status === 200) {
+        addAlert('Machine deleted successfully', 'success');
+        // Refresh the machine list after deletion
+        fetchMachines();
+      } else {
+        addAlert('Failed to delete machine', 'error');
+      }
+    } catch (error) {
+      addAlert(`Error deleting machine: ${error.message}`, 'error');
+    }
+  };
+
   const addAlert = (message, type) => {
     const newAlert = { message, type, id: Date.now() };
     setAlerts(prev => [...prev, newAlert]);
@@ -108,7 +123,11 @@ const Dashboard = () => {
       <Navbar onLogout={handleLogout} onAddMachine={handleAddMachineModal} />
       <div className="container mx-auto p-4 flex-1">
         <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
-        <MachineList machines={machines} onConnect={handlePasswordModal} />
+        <MachineList 
+        machines={machines} 
+        onConnect={handlePasswordModal} 
+        onDelete={deleteMachine}  
+      />
         
         {showPasswordModal && (
           <PasswordModal

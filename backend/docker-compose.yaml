@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: bitnami/postgresql
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sushi
+    # volumes:
+      # - ./db/data:/bitnami/postgresql/data
+    restart: always
+   
+  # redis:
+  #   image: redis/redis-stack:latest
+  #   container_name: redis
+  #   ports:
+  #     - "6379:6379"
+  #   restart: always
+    
+
+  sushi-backend:
+    image: breeze5690/sushi-backend-prod:v1
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_PORT=8080
+      - LOG_LEVEL=Debug
+      - JWT_SECRET=secret123
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=sushi
+      - MIGRATE_DB=true
+
+      # OAuth Configuration
+      - GOOGLE_CLIENT_ID=
+      - GOOGLE_CLIENT_SECRET=
+      - GOOGLE_REDIRECT_URL=http://localhost:8080/api/v1/auth/callback
+
+      - GITHUB_CLIENT_ID=
+      - GITHUB_CLIENT_SECRET=
+      - GITHUB_REDIRECT_URL=http://localhost:8080/api/v1/auth/callback 
+    # volumes:
+    #   - ./static:/app/static
+    depends_on:
+      - postgres
+    restart: always
