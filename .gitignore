@@ -2,3 +2,4 @@ app
 docker-compose-dev.yaml
 postgres-data
 docker-compose.yaml
+docker-compose-prod.yaml

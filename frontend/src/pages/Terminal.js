@@ -70,7 +70,7 @@ const TerminalComponent = () => {
     fitAddon.fit();
 
     const host = window.location.host;
-    const wsURL = `ws://${host}/api/v1/ssh?uuid=${uuid || noUUID()}`;
+    const wsURL = `wss://${host}/api/v1/ssh?uuid=${uuid || noUUID()}`;
     const ws = new WebSocket(wsURL);
 
     ws.onopen = () => {
